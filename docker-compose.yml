@@ -1,0 +1,43 @@
+Version:3
+
+services:
+  perf-grafana:
+    image: grafana/grafana:5.4.3
+    ports:
+      - "3000:3000"
+    container_name: perf-grafana
+    hostname: perf-grafana
+    networks:
+      perf-network:
+        aliases:
+            - perf-grafana
+            
+  perf-influxdb:
+    image: influxdb:1.7.3
+    ports:
+      - "8086:8086"
+      - "2003:2003"
+    container_name: perf-influxdb
+    hostname: perf-influxdb
+    networks:
+      perf-network:
+        aliases:
+            - perf-influxdb
+    volumes:
+      - ./influxdb:/var/lib/influxdb
+
+  perf-telegraf:
+    image: telegraf:1.9.2
+    container_name: perf-telegraf
+    hostname: perf-telegraf
+    networks:
+      perf-network:
+        aliases:
+            - perf-influxdb
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+  perf-network:
+    driver: "bridge"
