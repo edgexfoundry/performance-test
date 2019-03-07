@@ -1,0 +1,468 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: EdgeX Managed - VPC
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - VPCCIDR
+          - PublicSubnetCIDR
+          - PublicSubnetCIDR2
+          - PrivateSubnetCIDR
+          - Zone
+          - Zone2
+      - Label:
+          default: Bastion Information
+        Parameters:          
+          - InstanceRole
+          - KeyName
+          - InstanceType
+      - Label:
+          default: Tags
+        Parameters:
+          - TAGApplication
+          - TAGEnvironment
+          - TAGOwner
+    ParameterLabels:
+      VPCCIDR:
+        default: "CIDR Range"
+      Zone:
+        default: Availability Zone 1
+      Zone2:
+        default: Availability Zone 2
+      PublicSubnetCIDR:
+        default: Public Subnet CIDR      
+      PrivateSubnetCIDR:
+        default: Private Subnet CIDR            
+      InstanceRole:
+        default: Instance IAM Role
+      KeyName:
+        default: Key Pair
+      InstanceType:
+        default: Instance Type
+      TAGApplication:
+        default: "Application"
+      TAGEnvironment:
+        default: "Environment"
+      TAGOwner:
+        default: "Owner"
+      
+Parameters:
+  VPCCIDR:
+    Description: Overall CIDR for VPC - designed for masks 16-19.  Example 10.1.32.0/19
+    Type: String  
+  PublicSubnetCIDR:
+    Description: Must be child of VPC's subnets.  Example 10.1.35.0/24, 10.1.36.0/24, 10.1.37.0/24
+    Type: String
+  PublicSubnetCIDR2:
+    Description: Must be child of VPC's subnets.  Example 10.1.35.0/24, 10.1.36.0/24, 10.1.37.0/24
+    Type: String
+  PrivateSubnetCIDR:
+    Description: Must be child of VPC's subnets.  Example 10.1.35.0/24, 10.1.36.0/24, 10.1.37.0/24
+    Type: String
+  Zone:       
+    Type: AWS::EC2::AvailabilityZone::Name 
+  Zone2:
+    Type: AWS::EC2::AvailabilityZone::Name     
+  InstanceRole:
+    Description: Must be valid IAM Role with instance profile.
+    Type: String
+    Default: Instance
+  KeyName:
+    Description: Used for SSH Connection
+    Type: AWS::EC2::KeyPair::KeyName
+  InstanceType:
+    Description: Instance type
+    Type: String
+    Default: t2.nano
+  TAGApplication:
+    Description: Assigned Application Name
+    Type: String
+  TAGEnvironment:
+    Description: Valid values include Prod, pre1, str1, int1, tst1, dev1
+    Type: String
+  TAGOwner:
+    Description: ID of primary contact
+    Type: String
+Mappings:
+  RegionMap:
+    "us-east-1":
+      AMI: "ami-467ca739"
+    "us-east-2":
+      AMI: "ami-976152f2"
+    "us-west-1":
+      AMI: "ami-09bfcadb25ee95bec"
+    "us-west-2":
+      AMI: "ami-095cd038eef3e5074"
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Sub ${VPCCIDR}
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+      - Key: Name
+        Value: !Sub EdgeX-TIG ${VPCCIDR}
+      - Key: Application
+        Value: !Sub ${TAGApplication}
+      - Key: Environment
+        Value: !Sub ${TAGEnvironment}
+      - Key: Owner
+        Value: !Sub ${TAGOwner}
+      - Key: ServiceGroup
+        Value: Network
+  IGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: !Sub EdgeX-TIG ${VPC}
+      - Key: Application
+        Value: !Sub ${TAGApplication}
+      - Key: Environment
+        Value: !Sub ${TAGEnvironment}
+      - Key: Owner
+        Value: !Sub ${TAGOwner}
+      - Key: ServiceGroup
+        Value: Network
+  NAT1:
+    Type: AWS::EC2::NatGateway
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      AllocationId: !GetAtt NAT1EIP.AllocationId
+      SubnetId: !Ref Public1
+  NAT1EIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  Private1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref Zone
+      CidrBlock: !Ref PrivateSubnetCIDR
+      Tags:
+      - Key: Name
+        Value: Private 1
+      - Key: Application
+        Value: !Sub ${TAGApplication}
+      - Key: Environment
+        Value: !Sub ${TAGEnvironment}
+      - Key: Owner
+        Value: !Sub ${TAGOwner}
+      - Key: ServiceGroup
+        Value: Network
+      VpcId: !Ref VPC
+  Public1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref Zone
+      CidrBlock: !Ref PublicSubnetCIDR
+      Tags:
+      - Key: Name
+        Value: Public 1
+      - Key: Application
+        Value: !Sub ${TAGApplication}
+      - Key: Environment
+        Value: !Sub ${TAGEnvironment}
+      - Key: Owner
+        Value: !Sub ${TAGOwner}
+      - Key: ServiceGroup
+        Value: Network
+      VpcId: !Ref VPC
+  Public2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref Zone2
+      CidrBlock: !Ref PublicSubnetCIDR2
+      Tags:
+      - Key: Name
+        Value: Public 2
+      - Key: Application
+        Value: !Sub ${TAGApplication}
+      - Key: Environment
+        Value: !Sub ${TAGEnvironment}
+      - Key: Owner
+        Value: !Sub ${TAGOwner}
+      - Key: ServiceGroup
+        Value: Network
+      VpcId: !Ref VPC
+  RTAssociationPrivate1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RTPrivate1
+      SubnetId: !Ref Private1  
+  RTAssociationPublic1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RTPublic
+      SubnetId: !Ref Public1
+  RTAssociationPublic2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RTPublic
+      SubnetId: !Ref Public2
+  RTPrivate1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: Private 1
+      - Key: Application
+        Value: !Sub ${TAGApplication}
+      - Key: Environment
+        Value: !Sub ${TAGEnvironment}
+      - Key: Owner
+        Value: !Sub ${TAGOwner}
+      - Key: ServiceGroup
+        Value: Network  
+  RTPublic:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: Public 1
+      - Key: Application
+        Value: !Sub ${TAGApplication}
+      - Key: Environment
+        Value: !Sub ${TAGEnvironment}
+      - Key: Owner
+        Value: !Sub ${TAGOwner}
+      - Key: ServiceGroup
+        Value: Network
+  RouteInternet:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGateway
+      RouteTableId: !Ref RTPublic
+  RouteNATPrivate1:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NAT1
+      RouteTableId: !Ref RTPrivate1 
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref IGateway
+      VpcId: !Ref VPC
+  NetworkAclPublic:
+    Type: 'AWS::EC2::NetworkAcl'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: Public
+      - Key: Application
+        Value: !Sub ${TAGApplication}
+      - Key: Environment
+        Value: !Sub ${TAGEnvironment}
+      - Key: Owner
+        Value: !Sub ${TAGOwner}
+      - Key: ServiceGroup
+        Value: Network
+  NetworkAclPrivate:
+    Type: 'AWS::EC2::NetworkAcl'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: Private
+      - Key: Application
+        Value: !Sub ${TAGApplication}
+      - Key: Environment
+        Value: !Sub ${TAGEnvironment}
+      - Key: Owner
+        Value: !Sub ${TAGOwner}
+      - Key: ServiceGroup
+        Value: Network  
+  SubnetNetworkAclAssociationPublic1:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref Public1
+      NetworkAclId: !Ref NetworkAclPublic
+  SubnetNetworkAclAssociationPublic2:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref Public2
+      NetworkAclId: !Ref NetworkAclPublic
+  SubnetNetworkAclAssociationPrivate1:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref Private1
+      NetworkAclId: !Ref NetworkAclPrivate  
+  NetworkAclEntryInPublicAllowAll:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NetworkAclPublic
+      RuleNumber: 30000
+      Protocol: -1
+      RuleAction: allow
+      Egress: false
+      CidrBlock: '0.0.0.0/0'
+  NetworkAclEntryOutPublicAllowAll:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NetworkAclPublic
+      RuleNumber: 30000
+      Protocol: -1
+      RuleAction: allow
+      Egress: true
+      CidrBlock: '0.0.0.0/0'
+  NetworkAclEntryInPrivateAllowVPC:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NetworkAclPrivate
+      RuleNumber: 30000
+      Protocol: -1
+      RuleAction: allow
+      Egress: false
+      CidrBlock: '0.0.0.0/0'
+  NetworkAclEntryOutPrivateAllowVPC:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NetworkAclPrivate
+      RuleNumber: 30000
+      Protocol: -1
+      RuleAction: allow
+      Egress: true
+      CidrBlock: '0.0.0.0/0'   
+  BastionSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security Group for POC Bastion"       
+      SecurityGroupEgress:      
+      - CidrIp: !Sub ${VPCCIDR}
+        FromPort: 22
+        ToPort: 22
+        IpProtocol: tcp
+
+      SecurityGroupIngress:   
+      #FROM PROXIES
+      - CidrIp: 0.0.0.0/27
+        FromPort: "22"
+        IpProtocol: "tcp"
+        ToPort: "22"
+      VpcId:
+        Ref: "VPC"   
+  BastionIP:
+    Type: "AWS::EC2::EIP"
+    DependsOn: VPC
+    Properties:
+      Domain: vpc
+  LaunchConfiguration:
+    Type: "AWS::AutoScaling::LaunchConfiguration"
+    DependsOn: BastionIP
+    Properties:
+      AssociatePublicIpAddress: true
+      EbsOptimized: false
+      IamInstanceProfile: !Sub arn:aws:iam::${AWS::AccountId}:instance-profile/${InstanceRole}
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
+      InstanceType: !Ref InstanceType
+      SecurityGroups:
+      - !Ref BastionSecurityGroup
+      KeyName: !Ref KeyName
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash -x
+          ###### Map current Elastic IP to ourselves ######
+          INSTANCEID=$(curl -s -m 60 http://169.254.169.254/latest/meta-data/instance-id)
+          aws --region ${AWS::Region} ec2 associate-address --instance-id $INSTANCEID --allocation-id ${BastionIP.AllocationId}          
+          ###### CLOUD HALO ######
+          
+          ###### SSM Agent installation ######
+          
+  AutoScalingGroup:
+    Type: "AWS::AutoScaling::AutoScalingGroup"
+    Properties:
+      DesiredCapacity: 1
+      LaunchConfigurationName: !Ref LaunchConfiguration
+      MaxSize: 1
+      MinSize: 1
+      Tags:
+      - Key: Name
+        Value: Bastion
+        PropagateAtLaunch: True
+      - Key: Application
+        Value: !Sub ${TAGApplication}
+        PropagateAtLaunch: True
+      - Key: Environment
+        Value: !Sub ${TAGEnvironment}
+        PropagateAtLaunch: True
+      - Key: Owner
+        Value: !Sub ${TAGOwner}        
+        PropagateAtLaunch: True
+      VPCZoneIdentifier:
+      - !Ref Public1
+Outputs:
+  VPC:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: !Sub ${AWS::StackName}-VPC
+  VPCCIDR:
+    Description: VPC's CIDR
+    Value: !Ref VPCCIDR
+    Export:
+      Name: !Sub ${AWS::StackName}-CIDR
+  IGateway:
+    Description: Internet Gateway
+    Value: !Ref IGateway
+    Export:
+      Name: !Sub ${AWS::StackName}-IGateway
+  NATIP1:
+    Description: Public IP for NAT Server in Zone 1
+    Value: !Ref NAT1EIP
+    Export:
+      Name: !Sub ${AWS::StackName}-NATIP1  
+  PrivateSubnet1:
+    Description: Private Subnet 1
+    Value: !Ref Private1
+    Export:
+      Name: !Sub ${AWS::StackName}-PrivateSubnet1  
+  PublicSubnet1:
+    Description: Public Subnet 1
+    Value: !Ref Public1
+    Export:
+      Name: !Sub ${AWS::StackName}-PublicSubnet1
+  PublicSubnet2:
+    Description: Public Subnet 2
+    Value: !Ref Public2
+    Export:
+      Name: !Sub ${AWS::StackName}-PublicSubnet2
+  RTPrivate1:
+    Description: Route Table for Private Subnet 1
+    Value: !Ref RTPrivate1
+    Export:
+      Name: !Sub ${AWS::StackName}-RTPrivate1  
+  RTPublic:
+    Description: Route Table for Public Subnets
+    Value: !Ref RTPublic
+    Export:
+      Name: !Sub ${AWS::StackName}-RTPublic
+  NetworkAclPublic:
+    Description: Network ACL for Public Subnets
+    Value: !Ref NetworkAclPublic
+    Export:
+      Name: !Sub ${AWS::StackName}-NetworkAclPublic
+  NetworkAclPrivate:
+    Description: Network ACL for Private Subnets
+    Value: !Ref NetworkAclPrivate
+    Export:
+      Name: !Sub ${AWS::StackName}-NetworkAclPrivate
+  Zone1:
+    Description: Availability Zone 1
+    Value: !Ref Zone
+    Export:
+      Name: !Sub ${AWS::StackName}-Zone1
+  BastionSG:
+    Description: SG for Bastion
+    Value: !Ref BastionSecurityGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-BastionSecurityGroup  

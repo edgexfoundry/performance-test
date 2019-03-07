@@ -1,0 +1,462 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: EdgeX Managed - Instance      
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Infrastructure Configuration
+        Parameters:
+          - VPCStack          
+      - Label:
+          default: Instance Information
+        Parameters:    
+          - InstanceName 
+          - InstanceType
+          - DriveSize          
+          - InstanceRole
+          - KeyName
+          - HostedZone
+      - Label:
+          default: Tags
+        Parameters:
+          - TAGApplication
+          - TAGEnvironment
+          - TAGOwner
+    ParameterLabels:
+      InstanceName:
+        default: Instance Name
+      InstanceType:
+        default: Instance Type
+      VPCStack:
+        default: VPC Stack              
+      InstanceRole:
+        default: Instance IAM Role
+      KeyName:
+        default: Key Pair
+      InstanceType:
+        default: Instance Type
+      DriveSize:
+        default: Drive Size
+      TAGApplication:
+        default: Application
+      TAGEnvironment:
+        default: Environment
+      TAGOwner:
+        default: Owner
+Parameters:      
+  InstanceName:
+    Description: Name value for instance label
+    Type: String
+  InstanceType:
+    Description: Instance type
+    Type: String
+    Default: t2.nano
+    AllowedValues: [
+      "t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large", "t2.xlarge", "t2.2xlarge"         
+    ]  
+  VPCStack:
+    Description: The name of the cloud formation stack that deployed the VPC
+    Type: String
+  InstanceRole:
+    Description: Must be valid IAM Role with instance profile.
+    Type: String
+    Default: Instance
+  KeyName:
+    Description: Used for SSH Connection
+    Type: AWS::EC2::KeyPair::KeyName
+  HostedZone:
+    Description: Hosted Zone for ELB
+    Type: String
+    Default: 'abcxyz.net.'
+  DriveSize:
+    Description: Size of the EBS volume created for this instance
+    Type: Number
+    Default: 8
+    MinValue: 8
+    MaxValue: 500
+  TAGApplication:
+    Description: Assigned Application Name
+    Type: String
+  TAGEnvironment:
+    Description: Valid values include Prod, pre1, str1, int1, tst1, dev1
+    Type: String
+  TAGOwner:
+    Description: ID of primary contact
+    Type: String
+Mappings:
+  RegionMap:
+    "us-east-1":
+      AMI: "ami-467ca739"
+    "us-east-2":
+      AMI: "ami-976152f2"
+    "us-west-1":
+      AMI: "ami-09bfcadb25ee95bec"
+    "us-west-2":
+      AMI: "ami-095cd038eef3e5074"
+Resources:
+
+  InstanceSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Securtiy Group for EdgeX Instances"     
+      VpcId: 
+        "Fn::ImportValue": !Sub ${VPCStack}-VPC   
+      SecurityGroupEgress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: 80
+        ToPort: 80
+        IpProtocol: tcp
+      - CidrIp: 0.0.0.0/0
+        FromPort: 443
+        ToPort: 443
+        IpProtocol: tcp
+      - CidrIp: 0.0.0.0/0
+        FromPort: 123
+        ToPort: 123
+        IpProtocol: udp
+      SecurityGroupIngress:      
+      - SourceSecurityGroupId:        
+          "Fn::ImportValue": !Sub ${VPCStack}-BastionSecurityGroup
+        FromPort: 22
+        ToPort: 22
+        IpProtocol: tcp
+
+  InstanceELBSecurityGroupGrafana:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Securtiy Group for ELB to Instance"
+      VpcId: 
+        "Fn::ImportValue": !Sub ${VPCStack}-VPC
+      Tags:
+      - Key: Name
+        Value: EdgeX ELB SG Grafana
+      
+      SecurityGroupIngress:
+      # Grafana mapped to 8010 from 3000 by compose
+      - IpProtocol: tcp
+        FromPort: '8010'
+        ToPort: '8010'
+        CidrIp: 0.0.0.0/32 #appliance 1 - ASSUMES STATIC IP FOR AN APPLIANCE
+      - IpProtocol: tcp
+        FromPort: '8010'
+        ToPort: '8010'
+        CidrIp: 0.0.0.0/32 #appliance 2
+      - IpProtocol: tcp
+        FromPort: '8010'
+        ToPort: '8010'
+        CidrIp: 0.0.0.0/32 #appliance 3
+        #PROXIES
+      - CidrIp: 0.0.0.0/27
+        FromPort: "8010"
+        IpProtocol: "tcp"
+        ToPort: "8010"     
+  ELBInstanceSGIngressFromELB8010:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: '8010'
+      ToPort: '8010'
+      SourceSecurityGroupId: !Ref InstanceELBSecurityGroupGrafana
+      GroupId: !Ref InstanceSecurityGroup
+  ELBInstanceSGEgressToInstance8010:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: '8010'
+      ToPort: '8010'
+      DestinationSecurityGroupId: !Ref InstanceSecurityGroup
+      GroupId: !Ref InstanceELBSecurityGroupGrafana
+
+  InstanceELBSecurityGroupKibana:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Securtiy Group for ELB to Instance"
+      VpcId: 
+        "Fn::ImportValue": !Sub ${VPCStack}-VPC
+      Tags:
+      - Key: Name
+        Value: EdgeX ELB SG Kibana
+      SecurityGroupIngress:
+      # Kibana  
+      - IpProtocol: tcp
+        FromPort: '5601'
+        ToPort: '5601'
+        CidrIp: 0.0.0.0/32 #appliance 1 - ASSUMES STATIC IP FOR AN APPLIANCE
+      - IpProtocol: tcp
+        FromPort: '5601'
+        ToPort: '5601'
+        CidrIp: 0.0.0.0/32 #appliance 2
+      - IpProtocol: tcp
+        FromPort: '5601'
+        ToPort: '5601'
+        CidrIp: 0.0.0.0/32 # appliance 3
+        #PROXIES
+      - CidrIp: 0.0.0.0/27
+        FromPort: "5601"
+        IpProtocol: "tcp"
+        ToPort: "5601"
+  ELBInstanceSGIngressFromELB5601:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: '5601'
+      ToPort: '5601'
+      SourceSecurityGroupId: !Ref InstanceELBSecurityGroupKibana
+      GroupId: !Ref InstanceSecurityGroup   
+  ELBInstanceSGEgressToInstance5601:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: '5601'
+      ToPort: '5601'
+      DestinationSecurityGroupId: !Ref InstanceSecurityGroup
+      GroupId: !Ref InstanceELBSecurityGroupKibana  
+
+  InstanceELBSecurityGroupChronograf:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Securtiy Group for ELB to Instance"
+      VpcId: 
+        "Fn::ImportValue": !Sub ${VPCStack}-VPC
+      Tags:
+      - Key: Name
+        Value: EdgeX ELB SG Chronograf
+      SecurityGroupIngress:
+      # Chronograf  
+      - IpProtocol: tcp
+        FromPort: '8888'
+        ToPort: '8888'
+        CidrIp: 0.0.0.0/32 #appliance 1 - ASSUMES STATIC IP FOR AN APPLIANCE
+      - IpProtocol: tcp
+        FromPort: '8888'
+        ToPort: '8888'
+        CidrIp: 0.0.0.0/32 #appliance 2
+      - IpProtocol: tcp
+        FromPort: '8888'
+        ToPort: '8888'
+        CidrIp: 0.0.0.0/32 # appliance 3
+        #PROXIES
+      - CidrIp: 0.0.0.0/27
+        FromPort: "8888"
+        IpProtocol: "tcp"
+        ToPort: "8888"
+  ELBInstanceSGIngressFromELB8888:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: '8888'
+      ToPort: '8888'
+      SourceSecurityGroupId: !Ref InstanceELBSecurityGroupChronograf
+      GroupId: !Ref InstanceSecurityGroup 
+  ELBInstanceSGEgressToInstance8888:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: '8888'
+      ToPort: '8888'
+      DestinationSecurityGroupId: !Ref InstanceSecurityGroup
+      GroupId: !Ref InstanceELBSecurityGroupChronograf  
+
+  InstanceELBSecurityGroupInfluxDB:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Securtiy Group for ELB to Instance"
+      VpcId: 
+        "Fn::ImportValue": !Sub ${VPCStack}-VPC
+      Tags:
+      - Key: Name
+        Value: EdgeX ELB SG InfluxDB
+      SecurityGroupIngress:
+      # InfluxDB mapped from 8086 to 8011 by compose            
+      - IpProtocol: tcp
+        FromPort: '8011' 
+        ToPort: '8011'
+        CidrIp: 0.0.0.0/32 #appliance 1 - ASSUMES STATIC IP FOR AN APPLIANCE
+      - IpProtocol: tcp
+        FromPort: '8011' 
+        ToPort: '8011'
+        CidrIp: 0.0.0.0/32 #appliance 2    
+      - IpProtocol: tcp
+        FromPort: '8011'
+        ToPort: '8011'
+        CidrIp: 0.0.0.0/32 # appliance 3   
+        #PROXIES
+      - CidrIp: 0.0.0.0/27
+        FromPort: "8011"
+        IpProtocol: "tcp"
+        ToPort: "8011"
+  ELBInstanceSGIngressFromELB8011:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: '8011'
+      ToPort: '8011'
+      SourceSecurityGroupId: !Ref InstanceELBSecurityGroupInfluxDB
+      GroupId: !Ref InstanceSecurityGroup
+  ELBInstanceSGEgressToInstance8011:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: '8011'
+      ToPort: '8011'
+      DestinationSecurityGroupId: !Ref InstanceSecurityGroup
+      GroupId: !Ref InstanceELBSecurityGroupInfluxDB
+
+  InstanceELBSecurityGroupLogstash:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Securtiy Group for ELB to Instance"
+      VpcId: 
+        "Fn::ImportValue": !Sub ${VPCStack}-VPC
+      Tags:
+      - Key: Name
+        Value: EdgeX ELB SG Logstash
+      SecurityGroupIngress:
+      # Logstash/Filebeat              
+      - IpProtocol: tcp
+        FromPort: '5044' 
+        ToPort: '5044'
+        CidrIp: 0.0.0.0/32 #appliance 1 - ASSUMES STATIC IP FOR AN APPLIANCE
+      - IpProtocol: tcp
+        FromPort: '5044' 
+        ToPort: '5044'
+        CidrIp: 0.0.0.0/32 #appliance 2    
+      - IpProtocol: tcp
+        FromPort: '5044'
+        ToPort: '5044'
+        CidrIp: 0.0.0.0/32 # appliance 3
+        #PROXIES
+      - CidrIp: 0.0.0.0/27
+        FromPort: "5044"
+        IpProtocol: "tcp"
+        ToPort: "5044"        
+  ELBInstanceSGIngressFromELB5044:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: '5044'
+      ToPort: '5044'
+      SourceSecurityGroupId: !Ref InstanceELBSecurityGroupLogstash
+      GroupId: !Ref InstanceSecurityGroup        
+  ELBInstanceSGEgressToInstance5044:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: '5044'
+      ToPort: '5044'
+      DestinationSecurityGroupId: !Ref InstanceSecurityGroup
+      GroupId: !Ref InstanceELBSecurityGroupLogstash   
+  
+  ELBDNS:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: CNAME Record Set for ELB
+      HostedZoneName: !Ref HostedZone
+      Name: !Sub 'EdgeX-tig1.${HostedZone}'
+      Type: CNAME
+      TTL: '900'
+      SetIdentifier: EdgeX ELB
+      Weight: '4'
+      ResourceRecords:
+      - !GetAtt ElasticLoadBalancer.DNSName
+
+  ElasticLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      Subnets:
+      - "Fn::ImportValue": !Sub ${VPCStack}-PublicSubnet1
+      - "Fn::ImportValue": !Sub ${VPCStack}-PublicSubnet2      
+      SecurityGroups:
+      - !Ref InstanceELBSecurityGroupGrafana
+      - !Ref InstanceELBSecurityGroupKibana
+      - !Ref InstanceELBSecurityGroupChronograf
+      - !Ref InstanceELBSecurityGroupInfluxDB
+      - !Ref InstanceELBSecurityGroupLogstash
+      Listeners:
+      - LoadBalancerPort: '5044'
+        InstancePort: '5044'
+        Protocol: TCP      
+        InstanceProtocol: TCP
+      - LoadBalancerPort: '5601'
+        InstancePort: '5601'
+        Protocol: HTTP
+        InstanceProtocol: HTTP
+      - LoadBalancerPort: '8010'
+        InstancePort: '8010'
+        Protocol: TCP
+        InstanceProtocol: TCP
+      - LoadBalancerPort: '8011'
+        InstancePort: '8011'
+        Protocol: TCP
+        InstanceProtocol: TCP      
+      - LoadBalancerPort: '8888'
+        InstancePort: '8888'
+        Protocol: TCP
+        InstanceProtocol: TCP            
+      HealthCheck:
+        Target: TCP:8010
+        HealthyThreshold: '3'
+        UnhealthyThreshold: '5'
+        Interval: '30'
+        Timeout: '5'
+
+  InstanceASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      LaunchConfigurationName: !Ref InstanceLC
+      HealthCheckGracePeriod: 300
+      MinSize: 1
+      MaxSize: 1
+      LoadBalancerNames:
+      - !Ref ElasticLoadBalancer
+      VPCZoneIdentifier:
+      - "Fn::ImportValue": !Sub ${VPCStack}-PrivateSubnet1
+      Tags:
+      - Key: Name
+        Value: !Sub ${InstanceName}
+        PropagateAtLaunch: 'true'
+      - Key: Application
+        Value: !Sub ${TAGApplication}
+        PropagateAtLaunch: 'true'
+      - Key: Environment
+        Value: !Sub ${TAGEnvironment}
+        PropagateAtLaunch: 'true'
+      - Key: Owner
+        Value: !Sub ${TAGOwner}
+        PropagateAtLaunch: 'true'  
+  InstanceLC:
+    Type: "AWS::AutoScaling::LaunchConfiguration"
+    Properties:
+      EbsOptimized: false
+      IamInstanceProfile: !Sub ${InstanceRole}
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
+      InstanceType: !Ref InstanceType
+      SecurityGroups: 
+      - !Ref InstanceSecurityGroup      
+      KeyName: !Ref KeyName
+      BlockDeviceMappings:
+      - DeviceName: /dev/xvda
+        Ebs:
+          VolumeType: gp2
+          VolumeSize: !Ref DriveSize
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash -x         
+          ###### CLOUD HALO ######
+          
+          ###### SSM Agent installation ######
+          
+          ### Install Docker
+          yum update -y 
+          yum install -y docker
+          service docker start
+          usermod -a -G docker ec2-user
+          sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/bin/docker-compose
+          sudo chmod +x /usr/bin/docker-compose
+          ##### Install Telemetry stack #####
+
+
+Outputs:
+  ELBDNS:
+    Description: DNS for the ELB
+    Value: !Ref ELBDNS
