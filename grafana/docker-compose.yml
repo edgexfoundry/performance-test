@@ -26,18 +26,6 @@ services:
     volumes:
       - ./influxdb:/var/lib/influxdb
 
-  perf-telegraf:
-    image: telegraf:1.9.2
-    container_name: perf-telegraf
-    hostname: perf-telegraf
-    networks:
-      perf-network:
-        aliases:
-            - perf-influxdb
-    volumes:
-      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-
 networks:
   perf-network:
     driver: "bridge"
