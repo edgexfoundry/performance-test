@@ -151,6 +151,8 @@ Setup Jmeter
 1. Make sure Java version 8 or above exists on the machine on which you want to setup Jmeter.
 2. Download and setup Jmeter, for more information refer to https://jmeter.apache.org/usermanual/get-started.html#install
 3. Install Property File Plugin to use custom properties on the GUI. This is required for GUI mode.
+  - Get and install Property File Plugin from http://www.testautomationguru.com/jmeter-property-file-reader-a-custom-config-element/
+
 
 
 
