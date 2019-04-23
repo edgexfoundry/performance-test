@@ -1,0 +1,21 @@
+name,min,max,type,uomLabel,defaultValue,formatting,label1,label2,description 
+co2,12,15,F,degreecel,0,%s,NHC02,havc,
+NHCO5,-40,140,F,degreecel,0,%s,temp,havc,
+RPM,0,1200,F,degreecel,0,%s,RPM,,
+O2,0,15,F,degreecel,0,%s,temp,havc,
+temperature,0,100,F,temperature,0,%s,temp,havc,
+Amount of Substance,0,1000,F,Moles,0,%s,mole,,
+ohm,0,500,F,ohm,0,%s,ohm,,
+temp,0,500,F,ohm,0,%s,ohm,,
+humancount ,0,100,I,count,0,%s,count,humans,people count 
+caninecount,0,100,I,count,0,%s,count,canines,dog count
+depth,1,10,I,feet,1,%s,scan,distance,scan distance
+duration,10,180,I,seconds,10,%s,duration,time,time between events
+cameraerror,,,S,,error,%s,error,message,error response message from a camera
+carcount,0,100,I,count,0,%s,count,car,car count 
+bikecount,0,100,I,count,0,%s,count,bicycle,bicycle count 
+scootercount,0,100,I,count,0,%s,count,motorcycle,motorcycle count 
+tomatocount,0,100,I,count,0,%s,count,vagetable,vegetable count
+orangecount,0,100,I,count,0,%s,count,fruit,fruit count
+vagetablecount,0,100,I,count,0,%s,count,vagetable,vegetable count
+fruitcount,0,100,I,count,0,%s,count,fruit,fruit count
