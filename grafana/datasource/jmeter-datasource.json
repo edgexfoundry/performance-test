@@ -1,0 +1,9 @@
+{
+    "name":"JMeter",
+    "type":"influxdb",
+    "access":"proxy",
+    "url":"http://${influxdbHost}:8086",
+    "database":"jmeter",
+    "basicAuth":false,
+    "readOnly":false
+}

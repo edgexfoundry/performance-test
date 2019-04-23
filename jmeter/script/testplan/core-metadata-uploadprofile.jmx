@@ -115,8 +115,8 @@ new File(testdatapath + &quot;res-deviceProfileID.csv&quot;).delete()</stringPro
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Device Profile" enabled="true">
           <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
             <collectionProp name="HTTPFileArgs.files">
-              <elementProp name="${testplandir}\..\testdata\perf_sample_profile.mod.${__threadNum}.yml" elementType="HTTPFileArg">
-                <stringProp name="File.path">${testplandir}\..\testdata\perf_sample_profile.mod.${__threadNum}.yml</stringProp>
+              <elementProp name="${testplandir}/../testdata/perf_sample_profile.mod.${__threadNum}.yml" elementType="HTTPFileArg">
+                <stringProp name="File.path">${testplandir}/../testdata/perf_sample_profile.mod.${__threadNum}.yml</stringProp>
                 <stringProp name="File.paramname">file</stringProp>
                 <stringProp name="File.mimetype">application/x-yaml</stringProp>
               </elementProp>
