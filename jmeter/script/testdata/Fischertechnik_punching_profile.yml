@@ -1,0 +1,142 @@
+# Copyright 2017 Dell Inc. All rights reserved.
+name: "Fischertechnik Punching Machine"
+manufacturer: "Fischertechnik"
+model: "Punching Machine"
+labels: 
+  - "conveyer belt"
+  - "press"
+  - "punch"
+description: "Fischertechnik conveyer belt, punching machine, and belt detectors"
+
+deviceResources:
+      -   
+        name: PunchingMachine
+        description: "Punching Machine control, + for down, - for up"
+        attributes: 
+            { interfaceName: "M1" }
+        properties: 
+            value:
+                { type: "Integer", readWrite: "RW", size: "1", minimum: "-8", maximum: "8" }
+            units:
+                { type: "String", readWrite: "R", defaultValue: "Power Level" }
+      -   
+        name: ConveyerBelt
+        description: "Conveyer Belt speed control, + for right, - for left"
+        attributes: 
+            { interfaceName: "M2" }
+        properties: 
+            value:
+                { type: "Integer", readWrite: "RW", size: "1", minimum: "-8", maximum: "8" }
+            units:
+                { type: "String", readWrite: "R", defaultValue: "Power Level" }
+      -   
+        name: BeltLights
+        description: "Conveyer Belt Lights control for sensing blockages"
+        attributes: 
+            { interfaceName: "M3" }
+        properties: 
+            value:
+                { type: "Integer", readWrite: "RW", size: "1", minimum: "0", maximum: "8" }
+            units:
+                { type: "String", readWrite: "R", defaultValue: "Power Level" }
+      -   
+        name: LeftBeltDetector
+        description: "1 for clear, 0 for blocked while lights are on"
+        attributes: 
+            { interfaceName: "I5" }
+        properties: 
+            value:
+                { type: "String", readWrite: "R", size: "1", minimum: "0", maximum: "1" }
+            units:
+                { type: "String", readWrite: "R", defaultValue: "Clear" }
+      -   
+        name: RightBeltDetector
+        description: "1 for clear, 0 for blocked while lights are on"
+        attributes: 
+            { interfaceName: "I6" }
+        properties: 
+            value:
+                { type: "String", readWrite: "R", size: "1", minimum: "0", maximum: "1" }
+            units:
+                { type: "String", readWrite: "R", defaultValue: "Clear" } 
+      -   
+        name: PressUpperLimit
+        description: "1 for punching press upper limit reached"
+        attributes: 
+            { interfaceName: "I7" }
+        properties: 
+            value:
+                { type: "String", readWrite: "R", size: "1", minimum: "0", maximum: "1" }
+            units:
+                { type: "String", readWrite: "R", defaultValue: "Maxima" }                
+      -   
+        name: PressLowerLimit
+        description: "1 for punching press lower limit reached"
+        attributes: 
+            { interfaceName: "I8" }
+        properties: 
+            value:
+                { type: "String", readWrite: "R", size: "1", minimum: "0", maximum: "1" }
+            units:
+                { type: "String", readWrite: "R", defaultValue: "Maxima" }
+      -   
+        name: Safety
+        description: "1 for conveyer belt and punching press safety enabled"
+        attributes: 
+            { interfaceName: "S1" }
+        properties: 
+            value:
+                { type: "Integer", readWrite: "RW", size: "1", minimum: "0", maximum: "1" }
+            units:
+                { type: "String", readWrite: "R", defaultValue: "Safety State" }
+             
+resources:
+  -
+    name: BeltState
+    get:
+      - { index: "1", operation: "get", object: "LeftBeltDetector", parameter: "LeftBeltDetector", property: "value", mappings: {"0": "Blocked", "1": "Clear"} }
+      - { index: "2", operation: "get", object: "RightBeltDetector", parameter: "RightBeltDetector", property: "value", mappings: {"0": "Blocked", "1": "Clear"} }
+      - { index: "3", operation: "get", object: "PressUpperLimit", parameter: "PressUpperLimit", property: "value", mappings: {"0": "In Bounds", "1": "Maxima Reached"} }
+      - { index: "4", operation: "get", object: "PressLowerLimit", parameter: "PressLowerLimit", property: "value", mappings: {"0": "In Bounds", "1": "Maxima Reached"} }
+      - { index: "5", operation: "get", object: "PunchingMachine", parameter: "PunchingMachine", property: "value" }
+      - { index: "6", operation: "get", object: "ConveyerBelt", parameter: "ConveyerBelt", property: "value" }
+      - { index: "7", operation: "get", object: "BeltLights", parameter: "BeltLights", property: "value" }
+      - { index: "8", operation: "get", object: "Safety", parameter: "Safety", property: "value" }
+    set:
+      - { index: "1", operation: "set", object: "PunchingMachine", parameter: "PunchingMachine", property: "value" }
+      - { index: "2", operation: "set", object: "ConveyerBelt", parameter: "ConveyerBelt", property: "value" }
+      - { index: "3", operation: "set", object: "BeltLights", parameter: "BeltLights", property: "value" }
+      - { index: "4", operation: "set", object: "Safety", parameter: "Safety", property: "value" }
+      
+  -
+    name: Init 
+    set:
+      - { index: "1", operation: "set", object: "BeltLights", parameter: "8", property: "value" }   
+      - { index: "2", operation: "set", object: "Safety", parameter: "1", property: "value" }      
+                   
+commands: 
+  - 
+    name: BeltState
+    get: 
+        path: "/api/v1/device/{deviceId}/BeltState"
+        responses: 
+          - 
+            code: "200"
+            description: "Get the system state."
+            expectedValues: ["PunchingMachine","PressUpperLimit","PressLowerLimit","ConveyerBelt","LeftBeltDetector","RightBeltDetector","BeltLights","Safety"]
+          -
+            code: "503"
+            description: "service unavailable"
+            expectedValues: []
+    put:
+        path: "/api/v1/device/{deviceId}/BeltState"
+        parameterNames: ["PunchingMachine","ConveyerBelt","BeltLights","Safety"]
+        responses:
+          - 
+            code: "204"
+            description: "Set the motor states."
+            expectedValues: []
+          -
+            code: "503"
+            description: "service unavailable"
+            expectedValues: []
