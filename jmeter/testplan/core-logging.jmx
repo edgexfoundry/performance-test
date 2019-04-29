@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.1.1 r1855137">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Performance Test - Core Data API" enabled="true">
-      <stringProp name="TestPlan.comments"></stringProp>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Performance Test - Logging Data API" enabled="true">
+      <stringProp name="TestPlan.comments">For now the Core Data API tests are executed seqeuntially with the log level being changed for each run. The INFO level generates the most traffic thus highest CPU usage. </stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
       <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
@@ -1231,6 +1231,7 @@
             </CSVDataSet>
             <hashTree/>
             <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Device Profile" enabled="true">
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
@@ -1290,7 +1291,6 @@
                   </elementProp>
                 </collectionProp>
               </elementProp>
-              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
               <stringProp name="HTTPSampler.port">${__P(test.metadata.port)}</stringProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -1325,6 +1325,7 @@
             </CSVDataSet>
             <hashTree/>
             <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Addressable" enabled="true">
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
@@ -1345,7 +1346,6 @@
                   </elementProp>
                 </collectionProp>
               </elementProp>
-              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
               <stringProp name="HTTPSampler.port">${__P(test.metadata.port)}</stringProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -1377,6 +1377,7 @@
             </CSVDataSet>
             <hashTree/>
             <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Device Service" enabled="true">
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
@@ -1395,7 +1396,6 @@
                   </elementProp>
                 </collectionProp>
               </elementProp>
-              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
               <stringProp name="HTTPSampler.port">${__P(test.metadata.port)}</stringProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -1430,6 +1430,7 @@
             </CSVDataSet>
             <hashTree/>
             <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Device" enabled="true">
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
@@ -1454,7 +1455,6 @@
                   </elementProp>
                 </collectionProp>
               </elementProp>
-              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
               <stringProp name="HTTPSampler.port">${__P(test.metadata.port)}</stringProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -1796,6 +1796,7 @@
         </RandomController>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Sending Event - Interval : 0.5s" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -1813,7 +1814,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">${__P(test.coredata.port)}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -1835,6 +1835,7 @@
             <hashTree/>
           </hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Sending Event - Interval : 1s" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -1852,7 +1853,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">${__P(test.coredata.port)}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -1874,6 +1874,7 @@
             <hashTree/>
           </hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Sending Event - Interval : 30s" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -1891,7 +1892,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">${__P(test.coredata.port)}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -1913,6 +1913,7 @@
             <hashTree/>
           </hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Sending Event - Interval : 60s" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -1930,7 +1931,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">${__P(test.coredata.port)}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2117,6 +2117,7 @@
         </GenericController>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set core-command" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -2126,7 +2127,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2143,6 +2143,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set core-data" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -2152,7 +2153,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2169,6 +2169,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set core-metadata" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -2178,7 +2179,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2195,6 +2195,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set export-client" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -2204,7 +2205,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2221,6 +2221,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set export-distro" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -2230,7 +2231,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2247,6 +2247,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set support-logging" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -2256,7 +2257,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2273,6 +2273,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set support-notifications" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -2282,7 +2283,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2299,6 +2299,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set support-scheduler" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -2308,7 +2309,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2325,6 +2325,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set sys-mgmt-agent" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -2334,7 +2335,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2416,6 +2416,7 @@
             </CSVDataSet>
             <hashTree/>
             <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Device Profile" enabled="true">
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
@@ -2475,7 +2476,6 @@
                   </elementProp>
                 </collectionProp>
               </elementProp>
-              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
               <stringProp name="HTTPSampler.port">${__P(test.metadata.port)}</stringProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2510,6 +2510,7 @@
             </CSVDataSet>
             <hashTree/>
             <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Addressable" enabled="true">
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
@@ -2530,7 +2531,6 @@
                   </elementProp>
                 </collectionProp>
               </elementProp>
-              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
               <stringProp name="HTTPSampler.port">${__P(test.metadata.port)}</stringProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2562,6 +2562,7 @@
             </CSVDataSet>
             <hashTree/>
             <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Device Service" enabled="true">
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
@@ -2580,7 +2581,6 @@
                   </elementProp>
                 </collectionProp>
               </elementProp>
-              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
               <stringProp name="HTTPSampler.port">${__P(test.metadata.port)}</stringProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2615,6 +2615,7 @@
             </CSVDataSet>
             <hashTree/>
             <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Device" enabled="true">
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="" elementType="HTTPArgument">
@@ -2639,7 +2640,6 @@
                   </elementProp>
                 </collectionProp>
               </elementProp>
-              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
               <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
               <stringProp name="HTTPSampler.port">${__P(test.metadata.port)}</stringProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -2981,6 +2981,7 @@
         </RandomController>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Sending Event - Interval : 0.5s" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -2998,7 +2999,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">${__P(test.coredata.port)}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -3020,6 +3020,7 @@
             <hashTree/>
           </hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Sending Event - Interval : 1s" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -3037,7 +3038,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">${__P(test.coredata.port)}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -3059,6 +3059,7 @@
             <hashTree/>
           </hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Sending Event - Interval : 30s" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -3076,7 +3077,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">${__P(test.coredata.port)}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -3098,6 +3098,7 @@
             <hashTree/>
           </hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Sending Event - Interval : 60s" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -3115,7 +3116,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">${__P(test.coredata.port)}</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -3328,6 +3328,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set core-data" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -3337,7 +3338,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -3354,6 +3354,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set core-metadata" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -3363,7 +3364,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -3380,6 +3380,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set export-client" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -3389,7 +3390,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -3406,6 +3406,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set export-distro" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -3415,7 +3416,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -3432,6 +3432,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set support-logging" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -3441,7 +3442,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -3458,6 +3458,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set support-notifications" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -3467,7 +3468,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -3484,6 +3484,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set support-scheduler" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -3493,7 +3494,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -3510,6 +3510,7 @@
           </HTTPSamplerProxy>
           <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Set sys-mgmt-agent" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
@@ -3519,7 +3520,6 @@
                 </elementProp>
               </collectionProp>
             </elementProp>
-            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <stringProp name="HTTPSampler.domain">${__P(test.machine)}</stringProp>
             <stringProp name="HTTPSampler.port">8500</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
