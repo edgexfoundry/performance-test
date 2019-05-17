@@ -10470,7 +10470,7 @@ deviceResources:
             units:
              { type: "String", readWrite: "R", defaultValue: "Test/Remote/Local"}
              
-resources:
+deviceCommands:
   -
     name: Temperature
     get:
@@ -10553,7 +10553,7 @@ resources:
     set:
       - { index: "1", operation: "set", object: "TemperatureEnable", property: "value", parameter: "TemperatureEnable" }   
                    
-commands: 
+coreCommands: 
 
   - 
     name: Query

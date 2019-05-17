@@ -90,7 +90,7 @@ deviceResources:
             units:
                 { type: "String", readWrite: "R", defaultValue: "Safety State" }
              
-resources:
+deviceCommands:
   -
     name: BeltState
     get:
@@ -114,7 +114,7 @@ resources:
       - { index: "1", operation: "set", object: "BeltLights", parameter: "8", property: "value" }   
       - { index: "2", operation: "set", object: "Safety", parameter: "1", property: "value" }      
                    
-commands: 
+coreCommands: 
   - 
     name: BeltState
     get: 

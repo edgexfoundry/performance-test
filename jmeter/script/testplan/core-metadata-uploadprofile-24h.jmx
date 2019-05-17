@@ -104,7 +104,7 @@ new File(testdatapath + &quot;res-deviceProfileID-YAML.csv&quot;).delete()</stri
               </elementProp>
               <elementProp name="eventTags" elementType="Argument">
                 <stringProp name="Argument.name">eventTags</stringProp>
-                <stringProp name="Argument.value"></stringProp>
+                <stringProp name="Argument.value">uploadDeviceProfileYAML</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
@@ -209,7 +209,7 @@ deviceResources:&#xd;
             units:&#xd;
                 { type: &quot;String&quot;, readWrite: &quot;R&quot;, defaultValue: &quot;Safety State&quot; }&#xd;
              &#xd;
-resources:&#xd;
+deviceCommands:&#xd;
   -&#xd;
     name: BeltState&#xd;
     get:&#xd;
@@ -233,7 +233,7 @@ resources:&#xd;
       - { index: &quot;1&quot;, operation: &quot;set&quot;, object: &quot;BeltLights&quot;, parameter: &quot;8&quot;, property: &quot;value&quot; }   &#xd;
       - { index: &quot;2&quot;, operation: &quot;set&quot;, object: &quot;Safety&quot;, parameter: &quot;1&quot;, property: &quot;value&quot; }      &#xd;
                    &#xd;
-commands: &#xd;
+coreCommands: &#xd;
   - &#xd;
     name: BeltState&#xd;
     get: &#xd;
