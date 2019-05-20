@@ -79,11 +79,43 @@ new File(testdatapath + &quot;res-deviceID.csv&quot;).delete()</stringProp>
                     <boolProp name="HTTPArgument.always_encode">false</boolProp>
                     <stringProp name="Argument.value">{&#xd;
   &quot;name&quot;:&quot;${deviceProfileName}&quot;,&#xd;
-  &quot;description&quot;:&quot;BACnet Honeywell thermostats&quot;,&#xd;
-  &quot;manufacturer&quot;:&quot;Honeywell&quot;,&#xd;
-  &quot;model&quot;:&quot;ABC123&quot;,&#xd;
-  &quot;labels&quot;:[&quot;bacnet&quot;,&quot;thermostat&quot;,&quot;Honeywell&quot;],&#xd;
-  &quot;commands&quot;:[&#xd;
+  &quot;description&quot;: &quot;Modbus Honeywell variable speed motors&quot;,&#xd;
+  &quot;manufacturer&quot;: &quot;Honeywell&quot;,&#xd;
+  &quot;model&quot;: &quot;ABC123&quot;,&#xd;
+  &quot;labels&quot;: [&#xd;
+    &quot;modbus&quot;,&#xd;
+    &quot;variable speed motor&quot;,&#xd;
+    &quot;Honeywell&quot;&#xd;
+  ],&#xd;
+  &quot;deviceCommands&quot;: [{&#xd;
+    &quot;get&quot;: [&#xd;
+      {&#xd;
+        &quot;parameter&quot;: &quot;CurrentRPM&quot;,&#xd;
+        &quot;property&quot;: &quot;presentValue&quot;,&#xd;
+        &quot;operation&quot;: &quot;get&quot;,&#xd;
+        &quot;object&quot;: &quot;AnalogValue_22&quot;&#xd;
+      }&#xd;
+    ]&#xd;
+  }],&#xd;
+  &quot;created&quot;: 1475655959515,&#xd;
+  &quot;modified&quot;: 1475655959515,&#xd;
+  &quot;origin&quot;: 1471806386919,&#xd;
+  &quot;coreCommands&quot;: [&#xd;
+   {&#xd;
+      &quot;name&quot;: &quot;current&quot;,&#xd;
+      &quot;get&quot;: {&#xd;
+        &quot;path&quot;: &quot;/current&quot;,&#xd;
+        &quot;response&quot;: {&#xd;
+          &quot;code&quot;: &quot;200&quot;,&#xd;
+          &quot;errorDescription&quot;: &quot;not a float&quot;,&#xd;
+          &quot;expectedValues&quot;: &quot;amps&quot;&#xd;
+        }&#xd;
+      },&#xd;
+      &quot;put&quot;: {&#xd;
+        &quot;path&quot;: &quot;/current&quot;&#xd;
+      },&#xd;
+      &quot;origin&quot;: 1471806386919&#xd;
+    },&#xd;
     {&#xd;
       &quot;origin&quot;:1471806386919,&#xd;
       &quot;name&quot;:&quot;cooling point&quot;,&#xd;
@@ -112,21 +144,7 @@ new File(testdatapath + &quot;res-deviceID.csv&quot;).delete()</stringProp>
         ]&#xd;
       }&#xd;
     }&#xd;
-  ],&#xd;
-  &quot;objects&quot;:{&#xd;
-    &quot;resources&quot;:{&#xd;
-      &quot;CurrentHumidity&quot;:{&#xd;
-        &quot;get&quot;:[&#xd;
-          {&#xd;
-            &quot;parameter&quot;:&quot;CurrentHumidity&quot;,&#xd;
-            &quot;property&quot;:&quot;presentValue&quot;,&#xd;
-            &quot;operation&quot;:&quot;get&quot;,&#xd;
-            &quot;object&quot;:&quot;AnalogValue_22&quot;&#xd;
-          }&#xd;
-        ]&#xd;
-      }&#xd;
-    }&#xd;
-  }&#xd;
+  ]&#xd;
 }</stringProp>
                     <stringProp name="Argument.metadata">=</stringProp>
                   </elementProp>
@@ -310,12 +328,12 @@ new File(testdatapath + &quot;res-deviceID.csv&quot;).delete()</stringProp>
               </elementProp>
               <elementProp name="testTitle" elementType="Argument">
                 <stringProp name="Argument.name">testTitle</stringProp>
-                <stringProp name="Argument.value">createDevice</stringProp>
+                <stringProp name="Argument.value">createDeviceSingleProfile</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="eventTags" elementType="Argument">
                 <stringProp name="Argument.name">eventTags</stringProp>
-                <stringProp name="Argument.value"></stringProp>
+                <stringProp name="Argument.value">createDeviceSingleProfile</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>

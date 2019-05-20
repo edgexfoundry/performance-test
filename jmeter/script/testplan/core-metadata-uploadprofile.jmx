@@ -99,12 +99,12 @@ new File(testdatapath + &quot;res-deviceProfileID.csv&quot;).delete()</stringPro
               </elementProp>
               <elementProp name="testTitle" elementType="Argument">
                 <stringProp name="Argument.name">testTitle</stringProp>
-                <stringProp name="Argument.value">UploadDeviceProfile</stringProp>
+                <stringProp name="Argument.value">uploadDeviceProfileFile</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="eventTags" elementType="Argument">
                 <stringProp name="Argument.name">eventTags</stringProp>
-                <stringProp name="Argument.value"></stringProp>
+                <stringProp name="Argument.value">uploadDeviceProfileFile</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
