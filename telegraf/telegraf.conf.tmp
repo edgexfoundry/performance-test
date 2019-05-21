@@ -2,7 +2,7 @@
   endpoint = "unix:///var/run/docker.sock"
   #container_name_exclude = [perf-telegraf,perf-grafana,perf-influxdb]
   container_name_include = ["edgex*"]
-  container_name_exclude = ["edgex-files"]
+  container_name_exclude = ["edgex-files","edgex-core-config-seed"]
   timeout = "5s"
   perdevice = true
   ## Whether to report for each container total blkio and network stats or not
