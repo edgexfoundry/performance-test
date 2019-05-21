@@ -15,7 +15,7 @@ pipeline {
                         stage ('Node 1: Deploy services') {
                             steps{
                                 script {                                
-                                    sh "sed 's/influxDBHost/'${env.INFLUXDBHOST}'/g; s/NODE/node-1/g' telegraf/telegraf.conf.tmp > telegraf/telegraf.conf"
+                                    sh "sed 's/influxDBHost/'${env.INFLUXDBHOST}'/g; s/NODE/node-1/g' telegraf/telegraf-template.conf > telegraf/telegraf.conf"
                                     // Install docker-compose
                                     sh './docker-compose-setup.sh'
                                     
@@ -50,7 +50,7 @@ pipeline {
                         stage ('Node 2: Deploy Services') {
                             steps {
                                 script {                                    
-                                    sh "sed 's/influxDBHost/'${env.INFLUXDBHOST}'/g; s/NODE/node-2/g' telegraf/telegraf.conf.tmp > telegraf/telegraf.conf"
+                                    sh "sed 's/influxDBHost/'${env.INFLUXDBHOST}'/g; s/NODE/node-2/g' telegraf/telegraf-template.conf > telegraf/telegraf.conf"
                                     // Install docker-compose
                                     sh './docker-compose-setup.sh'
                                     
@@ -83,7 +83,7 @@ pipeline {
                         stage ('Node 3: Deploy Services') {
                             steps {
                                 script {
-                                    sh "sed 's/influxDBHost/'${env.INFLUXDBHOST}'/g; s/NODE/node-3/g' telegraf/telegraf.conf.tmp > telegraf/telegraf.conf"
+                                    sh "sed 's/influxDBHost/'${env.INFLUXDBHOST}'/g; s/NODE/node-3/g' telegraf/telegraf-template.conf > telegraf/telegraf.conf"
 
                                     // Install docker-compose
                                     sh './docker-compose-setup.sh'
