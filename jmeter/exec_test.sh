@@ -16,10 +16,6 @@ echo "INFLUXDBHOST : "${INFLUXDBHOST}
     docker-compose run --rm jmeter -n -t script/testplan/core-command-getDeviceCommand.jmx -q script/testplan/edgex.properties -l script/logs/core-command-getDeviceCommand.jtl -J influxdbHost=${INFLUXDBHOST} -J test.machine=${node1}
     docker-compose run --rm jmeter -n -t script/testplan/core-command-getCommand-byDeviceID.jmx -q script/testplan/edgex.properties -l script/logs/core-command-getCommand-byDeviceID.jtl -J influxdbHost=${INFLUXDBHOST} -J test.machine=${node1} 
     docker-compose run --rm jmeter -n -t script/testplan/core-command-getCommand-byDeviceName.jmx -q script/testplan/edgex.properties -l script/logs/core-command-getCommand-byDeviceName.jtl -J influxdbHost=${INFLUXDBHOST} -J test.machine=${node1} 
-    docker-compose run --rm jmeter -n -t script/testplan/core-command-putCommandAdminState-byID.jmx -q script/testplan/edgex.properties -l script/logs/core-command-putCommandAdminState-byID.jtl -J influxdbHost=${INFLUXDBHOST} -J test.machine=${node1} 
-    docker-compose run --rm jmeter -n -t script/testplan/core-command-putCommandAdminState-byName.jmx -q script/testplan/edgex.properties -l script/logs/core-command-putCommandAdminState-byName.jtl -J influxdbHost=${INFLUXDBHOST} -J test.machine=${node1} 
-    docker-compose run --rm jmeter -n -t script/testplan/core-command-putCommandOpState-byID.jmx -q script/testplan/edgex.properties -l script/logs/core-command-putCommandOpState-byID.jtl -J influxdbHost=${INFLUXDBHOST} -J test.machine=${node1} 
-    docker-compose run --rm jmeter -n -t script/testplan/core-command-putCommandOpState-byName.jmx -q script/testplan/edgex.properties -l script/logs/core-command-putCommandOpState-byName.jtl -J influxdbHost=${INFLUXDBHOST} -J test.machine=${node1}  
 } &
 { 
     sleep 20s
