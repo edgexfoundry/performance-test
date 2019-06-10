@@ -168,33 +168,57 @@ Develop Test Script using GUI mode
   .. code-block:: none
 
     Performance Root Folder
-    │  docker-compose.yml
+    │  Jenkinsfile
+    │  docker-compose-setup.sh
     │
     ├─docs  *(documentation)
     │  │  Performance Test Environment and How to Develop Test Script.rst
     │  │
     │  └─screens
     │          grafana-docker.png
+    │          grafana-import-dashboard-1.png
     │          grafana-jmeter.png
     │          jmeter-resultsample.png
     │          jmeter-threadsetting.png
     │
-    └─jmeter
-        ├─testdata  *((Put all testdata on this folder))
-        │  │  perf_sample_profile.yml
-        │  │
-        │  └─csv  *(Put all csv files on this folder which are used for test plan)
-        │          cd-sendingevent-addressableName.csv
-        │          cd-sendingevent-deviceName.csv
-        │          cd-sendingevent-deviceProfileName.csv
-        │          cd-sendingevent-deviceServiceName.csv
-        │
-        └─testplan  *(Put all test plan and property files on this folder)
-                core-data-sendingevent.jmx
-                core-metadata-createaddressable.jmx
-                core-metadata-uploadprofile.jmx
-                edgex.properties
-
+    ├─grafana
+    │  │  docker-compose.yml
+    │  │  env_setup.sh
+    │  │  
+    │  └─datasource
+    │          jmeter-datasource.json
+    │          telegraf-datasource.json
+    │          
+    ├─jmeter
+    │  │  docker-compose.yml
+    │  │  exec_test.sh
+    │  │
+    │  ├─image
+    │  │      Dockerfile
+    │  │      entrypoint.sh
+    │  │
+    │  └─script
+    │       ├─testdata  *((Put all testdata on this folder))
+    │       │  │  perf_sample_profile.yml
+    │       │  │
+    │       │  └─csv  *(Put all csv files on this folder which are used for test plan)
+    │       │         cd-sendingevent-addressableName.csv
+    │       │         cd-sendingevent-deviceName.csv
+    │       │         cd-sendingevent-deviceProfileName.csv
+    │       │         cd-sendingevent-deviceServiceName.csv
+    │       │
+    │       └─testplan  *(Put all test plan and property files on this folder)
+    │                 core-data-sendingevent.jmx
+    │                 core-metadata-createaddressable.jmx
+    │                 core-metadata-uploadprofile.jmx
+    │                 edgex.properties
+    │
+    └─telegraf
+          arm64_env.sh
+          deploy-edgeX-Service.sh
+          docker-compose.yml
+          env.sh
+          telegraf-template.conf
 
 Create Test Plan Steps
 ^^^^^^^^^^^^^^^^^^^^^^
