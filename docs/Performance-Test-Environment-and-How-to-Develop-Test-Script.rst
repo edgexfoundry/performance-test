@@ -5,10 +5,11 @@ Performance Test Environment and How to Develop Test Script
 Environment
 -----------
 
-Setup Grafana, InfluxDB and Telegraf
+Setup Grafana, InfluxDB
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 docker-compose.yml
 ^^^^^^^^^^^^^^^^^^
+The file is placed under grafana folder.
 
 .. code-block:: none
 
@@ -40,50 +41,11 @@ docker-compose.yml
       volumes:
         - ./influxdb:/var/lib/influxdb
 
-    perf-telegraf:
-      image: telegraf:1.9.2
-      container_name: perf-telegraf
-      hostname: perf-telegraf
-      networks:
-        perf-network:
-          aliases:
-              - perf-influxdb
-      volumes:
-        - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
-        - /var/run/docker.sock:/var/run/docker.sock
-
   networks:
     perf-network:
       driver: "bridge"
 
-Note: Grafana, InfluxDB, Telegraf, and the test containers must be located on the same machine.
-
-telegraf.conf
-^^^^^^^^^^^^
-.. code-block:: none
-
-  [[inputs.docker]]
-    endpoint = "unix:///var/run/docker.sock"
-    ## Monitor container to exclude or include.
-    # container_name_exclude = [perf-telegraf,perf-grafana,perf-influxdb]
-    container_name_include = ["edgex*"]
-    timeout = "5s"
-    perdevice = true
-    ## Whether to report for each container total blkio and network stats or not
-    total = false
-    ## docker labels to include and exclude.
-    ## Note that an empty array for both will include all labels as tags
-    #docker_label_exclude = []
-    docker_label_include = []
- 
-  [[outputs.influxdb]]
-    urls = ["http://perf-influxdb:8086"] # required
-    database = "telegraf" # required
-    retention_policy = ""
-    write_consistency = "any"
-    timeout = "5s"
-
-Notes. The value of **container_name_include** based on https://github.com/edgexfoundry/blackbox-testing/blob/master/docker-compose.yml.
+Note: Grafana and InfluxDB must be located on the same machine.
 
 Create Databases on InfluxDB
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -146,13 +108,84 @@ Grafana Configuration
 
     Jmeter Dashboard
 
+Setup Telegraf and all services
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+docker-compose.yml
+^^^^^^^^^^^^^^^^^^
+The file is placed under telegraf folder.
+
+.. code-block:: none
+
+  Version:3
+
+  volumes:
+    db-data:
+    log-data:
+    consul-config:
+    consul-data:
+    vault-config:  
+    vault-file:
+    vault-logs:
+
+  services:
+  
+    <**edgeX services**>
+              
+    telegraf:
+    image: cherrycl/telegraf
+    container_name: telegraf
+    hostname: telegraf
+    networks:
+      - perf-network
+    volumes:
+      - ${WORKSPACE}/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    privileged: true
+
+  networks:
+    perf-network:
+      driver: "bridge"
+
+telegraf.conf
+^^^^^^^^^^^^
+.. code-block:: none
+
+  [[inputs.docker]]
+    endpoint = "unix:///var/run/docker.sock"
+    ## Monitor container to exclude or include.
+    # container_name_exclude = [perf-telegraf,perf-grafana,perf-influxdb]
+    container_name_include = ["edgex*"]
+    container_name_exclude = ["edgex-files","edgex-core-config-seed"]
+    timeout = "5s"
+    perdevice = true
+    ## Whether to report for each container total blkio and network stats or not
+    total = false
+    ## docker labels to include and exclude.
+    ## Note that an empty array for both will include all labels as tags
+    #docker_label_exclude = []
+    docker_label_include = []
+ 
+  [[outputs.influxdb]]
+    urls = ["http://influxDBHost:8086"] # required
+    database = "telegraf" # required
+    retention_policy = ""
+    write_consistency = "any"
+    timeout = "5s"
+
+Notes. 
+  1. The value of **container_name_include** based on https://github.com/edgexfoundry/blackbox-testing/blob/master/docker-compose.yml.
+  2. The value of **influxDBHost** on config file must be changed to host which has influxDB container.
+  3. Telegraf and edgeX services must be located on the same machine.
+  4. You can reference templated file, telegraf-template.conf, for telegraf.conf.
+  
+
+
 Setup Jmeter
 ~~~~~~~~~~~~
 1. Make sure Java version 8 or above exists on the machine on which you want to setup Jmeter.
 2. Download and setup Jmeter, for more information refer to https://jmeter.apache.org/usermanual/get-started.html#install
 3. Install Property File Plugin to use custom properties on the GUI. This is required for GUI mode.
   - Get and install Property File Plugin from http://www.testautomationguru.com/jmeter-property-file-reader-a-custom-config-element/
-
 
 
 
@@ -274,9 +307,9 @@ Test cases: Upload five device profiles, combined file size around 500k, once ea
   - Add Backend Listener
       - Backend Listener implementation : org.apache.jmeter.visualizers.backend.influxdb.InfluxdbBackendListenerClient
       - influxdbUrl : http://${influxdbHost}:8086/write?db=jmeter
-      - application : metadata
+      - application : metadata    (-- Test Service --)
       - summaryOnly : false
-      - Other fields to default value
+      - Other fields    (-- You can leave to default value or add some information for the test api --)
   
   - Add HTTP request of Sampler which is main test API
       - Server Name or IP : ${__P(test.machine)}
@@ -369,3 +402,9 @@ Run Test Using Non-GUI Mode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **$ jmeter -n -t test_plan.jmx -q propertfile.properties -l logfile.jtl**
+
+
+
+Notice for Jmeter Script
+~~~~~~~~~~~~~~~~~~~~~~~~~
+*Please ensure the Property File Reader is removed from the testplan, if your commit contains testplan.*
