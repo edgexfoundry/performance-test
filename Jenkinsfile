@@ -7,6 +7,12 @@ def isFinished = false
 pipeline {
     agent none
     stages {
+        stage('Prep Stage Test') {
+            agent { label "${env.NODE_EDGEX_1}" }
+            steps {
+                sh 'echo This is a prep stage'
+            }
+        }
         stage ('Start Test'){
             parallel {
                 stage ('Node 1') {
