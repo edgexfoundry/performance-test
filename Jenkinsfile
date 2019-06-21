@@ -7,6 +7,10 @@ def isFinished = false
 pipeline {
     agent none
     stages {
+	stage ('Test Only') {
+	    agent { label "${env.NODE_EDGEX_1}" }
+	    echo ("Testing only for regression setup ")
+	}
         stage ('Start Test'){
             parallel {
                 stage ('Node 1') {
