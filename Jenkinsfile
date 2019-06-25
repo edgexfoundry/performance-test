@@ -30,6 +30,8 @@ pipeline {
                                     // Deploy edgeX
                                     sh 'cd telegraf; ./deploy-edgeX-Service.sh'
                                     sh 'docker logs telegraf'
+				    echo "Docker ps output:"
+				    sh 'docker ps'
                                     
                                     // Get client IP
                                     node1 = sh(returnStdout: true, script: "hostname -i | tr ' ' '\n' | grep '^10.' | head -n 1")
@@ -51,74 +53,6 @@ pipeline {
                     }
                 }     
                     
-                stage ('Node 2') {
-                    when { expression{ return "${env.NODE_EDGEX_2}" !=''} }
-                    agent { label "${env.NODE_EDGEX_2}" }
-                    stages {
-                        stage ('Node 2: Deploy Services') {
-                            steps {
-                                script {                                    
-                                    sh "sed 's/influxDBHost/'${env.INFLUXDBHOST}'/g; s/NODE/node-2/g' telegraf/telegraf-template.conf > telegraf/telegraf.conf"
-                                    // Install docker-compose
-                                    sh './docker-compose-setup.sh'
-                                    
-                                    // Deploy edgeX
-                                    sh 'cd telegraf; ./deploy-edgeX-Service.sh'
-                                    // Get client IP
-                                    node2 = sh(returnStdout: true, script: "hostname -i | tr ' ' '\n' | grep '^10.' | head -n 1")
-                                    node2 = "${node2}".trim()
-                                }
-                            }
-                        }
-                        stage ('Node 2: Keep alive for receiving requests') {
-                            steps {
-                                script {                         
-                                    waitUntil {
-                                        script {
-                                            return isFinished
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                stage ('Node 3') {
-                    when { expression{ return "${env.NODE_EDGEX_3}" !=''} }
-                    agent { label "${env.NODE_EDGEX_3}" }
-                    stages {
-                        stage ('Node 3: Deploy Services') {
-                            steps {
-                                script {
-                                    sh "sed 's/influxDBHost/'${env.INFLUXDBHOST}'/g; s/NODE/node-3/g' telegraf/telegraf-template.conf > telegraf/telegraf.conf"
-
-                                    // Install docker-compose
-                                    sh './docker-compose-setup.sh'
-                                    
-                                    // Deploy edgeX
-                                    sh 'cd telegraf; ./deploy-edgeX-Service.sh'
-
-                                    // Get client IP
-                                    node3 = sh(returnStdout: true, script: "hostname -i | tr ' ' '\n' | grep '^10.' | head -n 1")
-                                    node3 = "${node3}".trim()
-                                }
-                            }
-                        }
-                        stage ('Node 3: Keep alive for receiving requests'){
-                            steps {
-                                script {
-                                    waitUntil {
-                                        script {
-                                            return isFinished
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
                 stage ('JMeter Progress') {
                     agent { label "${env.NODE_JMETER}" }
                     environment { INFLUXDBHOST = "${env.INFLUXDBHOST}" }
@@ -159,7 +93,7 @@ pipeline {
                                     echo "node3 : ${node3}"
                                     try {
                                         withEnv(["node1=${node1}","node2=${node2}","node3=${node3}"]){
-                                            sh 'cd jmeter; sh ./exec_test.sh'
+                                            sh 'ls; pwd; uname -a;'
                                         }
                                     } finally {
                                         isFinished = true
