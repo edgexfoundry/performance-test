@@ -53,46 +53,35 @@ pipeline {
                     }
                 }     
                     
-                stage ('JMeter Progress') {
+                stage ('Test Executor Progress') {
                     agent { label "${env.NODE_JMETER}" }
                     environment { INFLUXDBHOST = "${env.INFLUXDBHOST}" }
                     stages {
-                        stage ('JMeter: Setup'){
+                        stage ('TE: Setup'){
                             steps {
                                 script {
                                     sh './docker-compose-setup.sh'
                                 }
                             }
                         }
-                        stage ('JMeter: Wait until all nodes deply completely') {
+                        stage ('TE: Wait until all nodes deply completely') {
                             steps {
                                 script {
                                     waitUntil {
                                         script {
-                                            if ("${env.NODE_EDGEX_2}" == '') {
-                                                node2 = "${node1}"
-                                            } else {
-                                            node2 = "${node2}"
-                                            }
-                                            if ("${env.NODE_EDGEX_3}" == '') {
-                                                node3 = "${node1}"
-                                            } else {
-                                                node3 = "${node3}"
-                                            } 
-                                            return (node1 != '' && node2 != '' && node3 != '')
+                                            return (node1 != '')
                                         }
                                     }                                    
                                 }
                             }
                         }
-                        stage ('JMeter: Sending requests to all nodes - long run') {
+                        stage ('TE: Sending requests to all nodes - long run') {
                             steps {
                                 script {                                    
                                     echo "node1 : ${node1}"
-                                    echo "node2 : ${node2}"
-                                    echo "node3 : ${node3}"
                                     try {
                                         withEnv(["node1=${node1}","node2=${node2}","node3=${node3}"]){
+					    echo "Details inside test host"
                                             sh 'ls; pwd; uname -a;'
                                         }
                                     } finally {
