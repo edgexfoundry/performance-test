@@ -83,6 +83,10 @@ pipeline {
                                         withEnv(["node1=${node1}","node2=${node2}","node3=${node3}"]){
 					    echo "Details inside test host"
                                             sh 'ls; pwd; uname -a;'
+					    echo "Installing the tools"
+					    sh 'cd taf; ./updateme.sh'
+					    echo "Verifying pip package list"
+					    sh 'pip list'
                                         }
                                     } finally {
                                         isFinished = true
