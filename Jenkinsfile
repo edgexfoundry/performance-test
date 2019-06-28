@@ -87,6 +87,7 @@ pipeline {
 					    sh 'cd taf; ./updateme.sh'
 					    echo "Verifying pip package list"
 					    sh 'pip list'
+					    echo "The IP Address of the Appliance is ${node1}"
                                         }
                                     } finally {
                                         isFinished = true
