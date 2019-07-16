@@ -47,7 +47,7 @@ pipeline {
                 }     
                     
                 stage ('Test Executor Progress') {
-                    agent { label "${env.NODE_JMETER}" }
+                    agent { label "${env.NODE_TEST_HOST}" }
                     environment { INFLUXDBHOST = "${env.INFLUXDBHOST}" }
                     stages {
                         stage ('TE: Setup'){
