@@ -28,6 +28,7 @@ pipeline {
                                     // Get client IP
                                     node1 = sh(returnStdout: true, script: "hostname -i | tr ' ' '\n' | grep '^10.' | head -n 1")
                                     node1 = "${node1}".trim()
+				    echo "node1 IP: $node1"
                                 }
                             }
                         }
