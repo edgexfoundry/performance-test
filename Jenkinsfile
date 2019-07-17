@@ -5,6 +5,9 @@ def node3 = ''
 def isFinished = false
 
 pipeline {
+    options {
+        timeout(time: 28, unit: 'HOURS') 
+    }  
     agent none
     stages {
         stage ('Start Test'){
