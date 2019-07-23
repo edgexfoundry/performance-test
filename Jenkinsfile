@@ -61,14 +61,23 @@ pipeline {
 				}
 			    }
 			}
-                        stage ('TE: Setup'){
+                        stage ('TM: Docker Setup'){
                             steps {
                                 script {
                                     sh './docker-compose-setup.sh'
                                 }
                             }
                         }
-                        stage ('TE: Wait until all nodes deply completely') {
+
+                        stage ('TM: Config Generation'){
+                            steps {
+                                script {
+                                    sh './docker-compose-setup.sh'
+                                }
+                            }
+                        }
+
+                        stage ('TM: Wait until all nodes deply completely') {
                             steps {
                                 script {
                                     waitUntil {
@@ -79,12 +88,13 @@ pipeline {
                                 }
                             }
                         }
-                        stage ('TE: Sending requests to all nodes - long run') {
+
+                        stage ('TM: Robot execution') {
                             steps {
                                 script {                                    
                                     echo "node1 : ${node1}"
                                     try {
-                                        withEnv(["node1=${node1}","node2=${node2}","node3=${node3}"]){
+                                        withEnv(["node1=${node1}"]){
 					    echo "Details inside test host"
                                             sh 'ls; pwd; uname -a;'
 					    echo "Installing the tools"
