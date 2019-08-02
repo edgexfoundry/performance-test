@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 vBuildNumber="${CUSTOM_BUILD_NUMBER}"
 sshTempUpdateFile="/tmp/tempRemoteUpdate-${CUSTOM_BUILD_NUMBER}.sh"

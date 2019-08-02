@@ -1,16 +1,15 @@
-#! /bin/bash
+#!/bin/bash
 
 sshTempUpdateFile="/tmp/tempRemoteUpdate-${CUSTOM_BUILD_NUMBER}.sh"
-vJsonPropFile="iSIM-Properties.json"
-vJsonParser="scripts/iSIM-JsonParser.sh"
+vJsonPropFile="TM-Properties.json"
+vJsonParser="scripts/TM-JsonParser.sh"
 
 source ${vJsonParser} ${vJsonPropFile}
 
 vMail_admin=$(fnExtractJson mail_admin)
 vMail_subject=$(fnExtractJson mail_subject)
 vMail_list=$(fnExtractJson mail_list)
-vISIMTriggerPath="${WORKSPACE}/ivs-root/ivs-common/iSIM/nightly"
-vLinuxShareBase=$(fnExtractJson linux_share_base)
+vTMTriggerPath="${WORKSPACE}/ivs-root/ivs-common/iSIM/nightly"
 vISIMReportLocation="${HOME}/${vLinuxShareBase}/SCM/Automation/Artifacts/Reports/$(fnExtractJson build_type)/$(fnExtractJson GitRepositoryName)/${CUSTOM_BUILD_NUMBER}"
 vMAIL_TEXT=${vISIMReportLocation}/$(fnExtractJson mail_text)
 vMAIL_TEXT_SLACK="/tmp/${CUSTOM_BUILD_NUMBER}_slack_$(fnExtractJson mail_text)"

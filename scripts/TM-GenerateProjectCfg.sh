@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 vOutputCfg=$1
 vJsonPropFile="TM-Properties.json"
@@ -26,8 +26,7 @@ UC_NAMES=$(fnExtractJson uc_names)
 PROFILE_NAMES=$(fnExtractJson profile_names)
 DISABLE_PROXY=$(fnExtractJson DISABLE_PROXY)
 DISPLAY_ENABLED=$(fnExtractJson DISPLAY_ENABLED)
-DOXY_CONF_FILE=$(fnExtractJson doxygen_conf)
-GIT_REPO_NAME=$(fnExtractJson GitRepositoryName)
+GIT_REPO_NAME=$(fnExtractJson git_taf_repo)
 ROBOT_TAG=$(fnExtractJson robot_tag)
 ROBOT_CFG_FILTER=$(fnExtractJson robot_cfg_filter)
 ROBOT_STOP_ONFAIL=$(fnExtractJson jk_robot_stop_onfail)

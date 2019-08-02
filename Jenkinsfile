@@ -18,6 +18,7 @@ def v_TM_Trigger_Path = ''
 def v_TM_Utils_Path = ''
 def v_TAF_Path = ''
 def v_TAF_Cfg_Path = ''
+def v_TAF_Artifacts_Path = ''
 def v_TM_ReportTemplate = ''
 
 
@@ -78,7 +79,7 @@ pipeline {
 				script {
 				    tafBuildNum = generateBuildNumber()
 				    echo "tafBuildNum: $tafBuildNum"
-				    env.TAF_BUILD_NUM = "${tafBuildNum}-${env.BUILD_NUMBER}"
+				    env.CUSTOM_BUILD_NUMBER = "${tafBuildNum}-${env.BUILD_NUMBER}"
 				    def jsonProp = readJSON file:'TM-Properties.json'
 				    v_Git_TAF_Server = jsonProp.git_url
 				    v_Git_TAF_Repo = jsonProp.git_taf_repo
@@ -89,11 +90,12 @@ pipeline {
 
 				    // Path defs
 				    v_EVS_Root = "${env.WORKSPACE}/evs-root"
-				    v_TM_Path = "${v_EVS_Root}/TAF-Common/TAF-Manager"
+				    v_TM_Path = "${v_EVS_Root}/${v_Git_TC_Repo}/TAF-Manager"
 				    v_TM_Trigger_Path = "${v_TM_Path}/trigger"
 				    v_TM_Utils_Path = "${v_TM_Path}/utils"
 				    v_TAF_Path = "${v_EVS_Root}/TAF"
 				    v_TAF_Cfg_Path = "${v_TAF_Path}/config"
+				    v_TAF_Artifacts_Path = "${v_TAF_Path}/testArtifacts"
 				    v_TM_ReportTemplate = jsonProp.mail_text
 				    echo "v_Git_TAF_Server: ${v_Git_TAF_Server}"
 				}
@@ -114,7 +116,7 @@ pipeline {
 				    sh 'pwd; ls -l'
 				    sh 'ls -l evs-root'
 				    sh 'echo "WORKSPACE: $WORKSPACE"'
-				    sh 'echo "The custom build number is: [$TAF_BUILD_NUM]"'
+				    sh 'echo "The custom build number is: [$CUSTOM_BUILD_NUMBER]"'
 				    sh 'echo "v_Git_TAF_Server: $v_Git_TAF_Server"'
 				}
 			    }
@@ -123,6 +125,8 @@ pipeline {
                             steps {
                                 script {
                                     sh 'scripts/docker-compose-setup.sh'
+				    sh 'echo "Docker build for jq"'
+				    sh 'docker build -t jq_test .'
                                 }
                             }
                         }
@@ -131,17 +135,15 @@ pipeline {
                             steps {
                                 script {
 				    echo "In Config Generation"
-                                    //sh "scripts/iSIM-GenerateProjectCfg.sh ${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
-				    echo "${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
-				    //sh "scripts/iSIM-GenerateMailTemplate.sh ${v_TM_Trigger_Path}/${v_TM_ReportTemplate}"
-				    echo "${v_TM_Trigger_Path}/${v_TM_ReportTemplate}"
-				    //sh "scripts/iSIM-GenerateRobotCfg.sh ${v_TAF_Cfg_Path}/platform.cfg"
-				    echo "${v_TAF_Cfg_Path}/platform.cfg"
+                                    sh "scripts/TM-GenerateProjectCfg.sh ${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
+				    sh "cat ${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
+				    sh "scripts/TM-GenerateMailTemplate.sh ${v_TM_Trigger_Path}/${v_TM_ReportTemplate}"
+				    sh "scripts/TM-GenerateRobotCfg.sh ${v_TAF_Cfg_Path}/platform.cfg"
                                 }
                             }
                         }
 
-                        stage ('TM: Wait until all nodes deply completely') {
+                       /* stage ('TM: Wait until all nodes deply completely') {
                             steps {
                                 script {
                                     waitUntil {
@@ -151,7 +153,7 @@ pipeline {
                                     }                                    
                                 }
                             }
-                        }
+                        }*/
 
                         stage ('TM: Robot execution') {
                             steps {
@@ -162,14 +164,15 @@ pipeline {
 					    echo "Details inside test host"
                                             sh 'ls; pwd; uname -a;'
 					    echo "Installing the tools"
-				//	    sh "cd ${v_TAF_Path}; ./updateme.sh"
+					    echo "USER: $USER"
+					    //sh "cd ${v_EVS_Root}; ls; chmod +x updateme.sh; chmod +x ${v_TM_Trigger_Path}/TM-Trigger.sh; ./updateme.sh"
+					    sh "cd taf; chmod +x ${v_TM_Trigger_Path}/TM-Trigger.sh; sudo ./updateme.sh"
 					    echo "Verifying pip package list"
-					    sh 'pip list'
+					    sh 'pip3 list'
 					    echo "SILO: ${env.SILO}"
 					    echo "The IP Address of the Appliance is ${node1}"
-				//	    sh "bash ${v_TM_Trigger_Path}/TM-Trigger.sh ${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
-					    echo "${v_TM_Trigger_Path}/TM-Trigger.sh"
-					    echo "${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
+					    sh "bash ${v_TM_Trigger_Path}/TM-Trigger.sh ${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
+					    sh "ls ${v_TAF_Artifacts_Path}"
                                         }
                                     } finally {
                                         isFinished = true
@@ -184,6 +187,7 @@ pipeline {
     }
 }
 
+// Function definition to generate the random number
 def generateBuildNumber() {
     sh(script: 'echo $((1 + RANDOM % 1000 + 1000000))', returnStdout: true).trim()
 }

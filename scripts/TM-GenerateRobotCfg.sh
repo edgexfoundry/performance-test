@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 vOutputCfg=$1
 vJsonPropFile="TM-Properties.json"
@@ -14,7 +14,7 @@ source ${vJsonParser} ${vJsonPropFile}
 
 cat > ${vOutputCfg} <<EOF
 #Auto generated project configurations
-[Login]
-url_proto=$(fnExtractJson robot_Login_url_proto)
-
+[Demo]
+username=$(fnExtractJson robot_Demo_url_username)
+loglevel=$(fnExtractJson robot_Demo_loglevel)
 EOF
