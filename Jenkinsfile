@@ -21,6 +21,7 @@ def v_TAF_Cfg_Path = ''
 def v_TAF_Artifacts_Path = ''
 def v_TM_ReportTemplate = ''
 
+loadGlobalLibrary()
 
 pipeline {
     agent none
@@ -40,8 +41,9 @@ pipeline {
                             steps{
                                 script {                                
                                     sh "sed 's/influxDBHost/'${env.INFLUXDBHOST}'/g; s/NODE/node-1/g' telegraf/telegraf-template.conf > telegraf/telegraf.conf"
-                                    // Install docker-compose
-                                    sh './docker-compose-setup.sh'
+
+				    // Install docker-compose
+                                    sh './scripts/docker-compose-setup.sh'
                                     
                                     // Deploy edgeX
                                     sh 'cd telegraf; ./deploy-edgeX-Service.sh'
@@ -113,11 +115,9 @@ pipeline {
 				    }
 				}
 				script {
-				    sh 'pwd; ls -l'
 				    sh 'ls -l evs-root'
 				    sh 'echo "WORKSPACE: $WORKSPACE"'
 				    sh 'echo "The custom build number is: [$CUSTOM_BUILD_NUMBER]"'
-				    sh 'echo "v_Git_TAF_Server: $v_Git_TAF_Server"'
 				}
 			    }
 			}
@@ -125,8 +125,8 @@ pipeline {
                             steps {
                                 script {
                                     sh 'scripts/docker-compose-setup.sh'
-				    sh 'echo "Docker build for jq"'
-				    sh 'docker build -t jq_test .'
+//				    sh 'echo "Docker build for jq"'
+//				    sh 'docker build -t jq_test .'
                                 }
                             }
                         }
@@ -143,48 +143,64 @@ pipeline {
                             }
                         }
 
-                       /* stage ('TM: Wait until all nodes deply completely') {
-                            steps {
-                                script {
-                                    waitUntil {
-                                        script {
-                                            return (node1 != '')
-                                        }
-                                    }                                    
-                                }
-                            }
-                        }*/
-
                         stage ('TM: Robot execution') {
                             steps {
                                 script {                                    
-                                    echo "node1 : ${node1}"
-                                    try {
-                                        withEnv(["node1=${node1}"]){
-					    echo "Details inside test host"
-                                            sh 'ls; pwd; uname -a;'
-					    echo "Installing the tools"
-					    echo "USER: $USER"
-					    //sh "cd ${v_EVS_Root}; ls; chmod +x updateme.sh; chmod +x ${v_TM_Trigger_Path}/TM-Trigger.sh; ./updateme.sh"
-					    sh "cd taf; chmod +x ${v_TM_Trigger_Path}/TM-Trigger.sh; sudo ./updateme.sh"
-					    echo "Verifying pip package list"
-					    sh 'pip3 list'
-					    echo "SILO: ${env.SILO}"
-					    echo "The IP Address of the Appliance is ${node1}"
-					    sh "bash ${v_TM_Trigger_Path}/TM-Trigger.sh ${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
-					    sh "ls ${v_TAF_Artifacts_Path}"
-                                        }
-                                    } finally {
-                                        isFinished = true
+                                    echo "Node to be tested : ${node1}"
+				    withEnv(["node1=${node1}"]){
+					def v_Report = "${v_TAF_Artifacts_Path}/${CUSTOM_BUILD_NUMBER}"
+					echo "Test host details:"
+                                        sh 'uname -a'
+					echo "Installing the tools"
+					sh "cd ${v_EVS_Root}; sudo ./updateme.sh"
+//					sh "cd taf; chmod +x ${v_TM_Trigger_Path}/TM-Trigger.sh; sudo ./updateme.sh"
+					echo "Test execution on: ${env.SILO}"
+					sh "bash ${v_TM_Trigger_Path}/TM-Trigger.sh ${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
+					sh "ls ${v_TAF_Artifacts_Path}"
+					sh "[ -d ${v_Report} ] && zip -r ${v_TAF_Artifacts_Path}/artifacts.zip ${v_Report}"
                                     }
                                 }
                             }
-                        }
-                    }       
+			}
+
+			stage ('TM: Orchestration') {
+			    steps {
+				script {
+				    try {
+					echo "Orchestration of TAF artifacts to Nexus repository"
+					edgeXNexusPublish([
+					    serverId: 'nexus.edgexfoundry.org',
+					    mavenSettings: 'taf-test-settings',
+					    nexusRepo: 'taf-test',
+					    zipFilePath: '**/testArtifacts/*.zip'
+					])
+				    } finally {
+                                        isFinished = true
+				    }
+				}
+			    }
+			}
+                    }
                 }
             }
         }
     }
+}
+
+// EdgeX Nexus publish
+def loadGlobalLibrary(branch = '*/master') {
+    library(identifier: 'edgex-global-pipelines@master', 
+        retriever: legacySCM([
+            $class: 'GitSCM',
+            userRemoteConfigs: [[url: 'https://github.com/edgexfoundry/edgex-global-pipelines.git']],
+            branches: [[name: branch]],
+            doGenerateSubmoduleConfigurations: false,
+            extensions: [
+                [$class: 'SubmoduleOption', recursiveSubmodules: true],
+                [$class: 'IgnoreNotifyCommit']
+            ]
+        ])
+    )
 }
 
 // Function definition to generate the random number
