@@ -1,24 +1,12 @@
-# EdgeX Foundry Proformance Tests
+#  Regression Pipeline Overview
 
+This pipeline uses Jenkins as its code pipeline, few components are explained below
 
-## Folder structure
-- grafana folder : Only use when running on local grafana.
+*	Jekinsfile - a build descriptor written in the the Groovy programming language committed into the source repository that describes how the code will be built.
+    * Stage - User defined sequential steps of a job. For example, the test stage, build stage, etc.
+*	iSIM Parameters – A JSON file which contains the key-value pair as a parameter to the pipeline which will be parsed during the execution.
 
-- telegraf folder : Start telegraf and edgeX services.
+*	Staging scripts – Bunch of scripts to implement the stage.
 
-- jmeter folder : Run jmeter script.
-
-  - image folder : Use for build JMeter 
-  image. 
-  - script folder : jmeter test scripts and data.
-
-
-
-
-#### Notice for Jmeter Script
-*If your commit contains testplan, please ensure the Property File Reader is removed from the testplan.*
-
-## Local develop
-Please refer to the [documentation in the repository](docs/Performance-Test-Environment-and-How-to-Develop-Test-Script.rst) for details.
-
-
+*	TAF - Test and Automation Framework is a test automation code specific to the project, contains set of python routines wrapped within robot framework. 
+*	TAF-Common – this is the common repository contains the code, scripts, simulators that are to be used in all the projects.

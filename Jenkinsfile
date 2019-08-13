@@ -73,7 +73,6 @@ pipeline {
                     
                 stage ('Test Executor Progress') {
                     agent { label "${env.NODE_TEST_HOST}" }
-                    environment { INFLUXDBHOST = "${env.INFLUXDBHOST}" }
                     stages {
 
 			stage ('Init') {
@@ -99,7 +98,7 @@ pipeline {
 				    v_TAF_Cfg_Path = "${v_TAF_Path}/config"
 				    v_TAF_Artifacts_Path = "${v_TAF_Path}/testArtifacts"
 				    v_TM_ReportTemplate = jsonProp.mail_text
-				    echo "v_Git_TAF_Server: ${v_Git_TAF_Server}"
+				    echo "CUSTOM_BUILD_NUMBER: ${env.CUSTOM_BUILD_NUMBER}"
 				}
 			    }
 			}
@@ -114,19 +113,12 @@ pipeline {
 					    url: "https://${v_Git_TC_Server}/${v_Git_Org}/${v_Git_TC_Repo}.git"
 				    }
 				}
-				script {
-				    sh 'ls -l evs-root'
-				    sh 'echo "WORKSPACE: $WORKSPACE"'
-				    sh 'echo "The custom build number is: [$CUSTOM_BUILD_NUMBER]"'
-				}
 			    }
 			}
                         stage ('TM: Docker Setup'){
                             steps {
                                 script {
                                     sh 'scripts/docker-compose-setup.sh'
-//				    sh 'echo "Docker build for jq"'
-//				    sh 'docker build -t jq_test .'
                                 }
                             }
                         }
@@ -136,7 +128,6 @@ pipeline {
                                 script {
 				    echo "In Config Generation"
                                     sh "scripts/TM-GenerateProjectCfg.sh ${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
-				    sh "cat ${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
 				    sh "scripts/TM-GenerateMailTemplate.sh ${v_TM_Trigger_Path}/${v_TM_ReportTemplate}"
 				    sh "scripts/TM-GenerateRobotCfg.sh ${v_TAF_Cfg_Path}/platform.cfg"
                                 }
@@ -153,10 +144,8 @@ pipeline {
                                         sh 'uname -a'
 					echo "Installing the tools"
 					sh "cd ${v_EVS_Root}; sudo ./updateme.sh"
-//					sh "cd taf; chmod +x ${v_TM_Trigger_Path}/TM-Trigger.sh; sudo ./updateme.sh"
 					echo "Test execution on: ${env.SILO}"
 					sh "bash ${v_TM_Trigger_Path}/TM-Trigger.sh ${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
-					sh "ls ${v_TAF_Artifacts_Path}"
 					sh "[ -d ${v_Report} ] && zip -r ${v_TAF_Artifacts_Path}/artifacts.zip ${v_Report}"
                                     }
                                 }
@@ -205,5 +194,5 @@ def loadGlobalLibrary(branch = '*/master') {
 
 // Function definition to generate the random number
 def generateBuildNumber() {
-    sh(script: 'echo $((1 + RANDOM % 1000 + 1000000))', returnStdout: true).trim()
+    sh(script: 'echo $(date +"%Y%m%d%I%M")', returnStdout: true).trim()
 }
