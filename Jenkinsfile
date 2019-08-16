@@ -23,6 +23,33 @@ def v_TM_ReportTemplate = ''
 
 loadGlobalLibrary()
 
+properties(
+    [parameters
+        ([
+            string(defaultValue: '*/master', description: '''
+              GitHub PR Trigger provided parameter for specifying the commit
+              to checkout.
+
+              If using GitHub, in a manual build override with a branch path or
+              sha1 hash to a specific commit. For example: '{branch}' ''',
+		name: 'sha1'),
+
+            string(defaultValue: 'stats.edgexfoundry.org', description: '''
+		Parameter to identify a SCM project to build. This is typically
+                the project repo path. For example: ofextensions/circuitsw''',
+		name: 'INFLUXDBHOST'),
+
+            string(defaultValue: 'centos7-blackbox-4c-2g', description: '''
+		EdgeX services run on this node, can't be empt''',
+		name: 'NODE_EDGEX_1'),
+
+            string(defaultValue: 'ubuntu18.04-docker-arm64-4c-2g', description: '''
+                Trigger TAF script, can't be empty''',
+		name: 'NODE_TEST_HOST')
+        ])
+    ]
+)
+
 pipeline {
     agent none
 
