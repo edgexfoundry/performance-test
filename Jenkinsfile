@@ -108,6 +108,7 @@ pipeline {
 				    tafBuildNum = generateBuildNumber()
 				    echo "tafBuildNum: $tafBuildNum"
 				    env.CUSTOM_BUILD_NUMBER = "${tafBuildNum}-${env.BUILD_NUMBER}"
+				    env.NEXUS_EXT_PATH = "${env.SILO}/${env.JENKINS_HOSTNAME}/${env.JOB_NAME}"
 				    def jsonProp = readJSON file:'TM-Properties.json'
 				    v_Git_TAF_Server = jsonProp.git_url
 				    v_Git_TAF_Repo = jsonProp.git_taf_repo
@@ -124,8 +125,9 @@ pipeline {
 				    v_TAF_Path = "${v_EVS_Root}/TAF"
 				    v_TAF_Cfg_Path = "${v_TAF_Path}/config"
 				    v_TAF_Artifacts_Path = "${v_TAF_Path}/testArtifacts"
-				    v_TM_ReportTemplate = jsonProp.mail_text
+				    v_TM_ReportTemplate = jsonProp.report_text
 				    echo "CUSTOM_BUILD_NUMBER: ${env.CUSTOM_BUILD_NUMBER}"
+				    echo "NEXUS_EXT_PATH: ${env.NEXUS_EXT_PATH}"
 				}
 			    }
 			}
@@ -136,7 +138,7 @@ pipeline {
 				    git branch: 'master',
 					url: "https://${v_Git_TAF_Server}/${v_Git_Org}/${v_Git_TAF_Repo}.git"
 				    dir("${v_Git_TC_Repo}") {
-					git branch: 'master',
+					git branch: 'tm_reporting',
 					    url: "https://${v_Git_TC_Server}/${v_Git_Org}/${v_Git_TC_Repo}.git"
 				    }
 				}
@@ -172,6 +174,7 @@ pipeline {
 					echo "Installing the tools"
 					sh "cd ${v_EVS_Root}; sudo ./updateme.sh"
 					echo "Test execution on: ${env.SILO}"
+					def executionTimeSec = currentBuild.durationString.replaceAll(' and counting', '')
 					sh "bash ${v_TM_Trigger_Path}/TM-Trigger.sh ${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
 					sh "[ -d ${v_Report} ] && zip -r ${v_TAF_Artifacts_Path}/artifacts.zip ${v_Report}"
                                     }
@@ -183,13 +186,24 @@ pipeline {
 			    steps {
 				script {
 				    try {
+					sh "cp -v ${v_TM_Trigger_Path}/${v_TM_ReportTemplate} ${WORKSPACE}"
+					def executionTimeSec = currentBuild.durationString.replaceAll(' and counting', '')
+					sh "scripts/TM-UpdateReport.sh ${executionTimeSec}"
+					echo "Publishing the report"
+					archiveArtifacts ([
+					    allowEmptyArchive: true,
+					    artifacts: "${v_TM_ReportTemplate}"
+					])
+
 					echo "Orchestration of TAF artifacts to Nexus repository"
 					edgeXNexusPublish([
 					    serverId: 'nexus.edgexfoundry.org',
-					    mavenSettings: 'taf-test-settings',
-					    nexusRepo: 'taf-test',
+					    mavenSettings: 'taf-settings',
+					    nexusPath: "${env.NEXUS_EXT_PATH}",
+					    nexusRepo: 'taf',
 					    zipFilePath: '**/testArtifacts/*.zip'
 					])
+
 				    } finally {
                                         isFinished = true
 				    }

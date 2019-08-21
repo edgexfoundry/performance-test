@@ -26,7 +26,9 @@ UC_NAMES=$(fnExtractJson uc_names)
 PROFILE_NAMES=$(fnExtractJson profile_names)
 DISABLE_PROXY=$(fnExtractJson DISABLE_PROXY)
 DISPLAY_ENABLED=$(fnExtractJson DISPLAY_ENABLED)
-GIT_REPO_NAME=$(fnExtractJson git_taf_repo)
+GIT_TAF_REPO_NAME=$(fnExtractJson git_taf_repo)
+GIT_TC_REPO_NAME=$(fnExtractJson git_tc_repo)
+REPORT_TEXT=$(fnExtractJson report_text)
 ROBOT_TAG=$(fnExtractJson robot_tag)
 ROBOT_CFG_FILTER=$(fnExtractJson robot_cfg_filter)
 ROBOT_STOP_ONFAIL=$(fnExtractJson jk_robot_stop_onfail)
@@ -35,4 +37,5 @@ ROBOT_RETRY_COUNT=$(fnExtractJson jk_robot_retry_count)
 GIT_SERVER=$(fnExtractJson git_url)
 JK_CHECKOUT_DIR=${WORKSPACE}/evs-root
 JK_BUILD_NUMBER=${CUSTOM_BUILD_NUMBER}
+NEXUS_REPO=$(fnExtractJson nexus_repo)
 EOF

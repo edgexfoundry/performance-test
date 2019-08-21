@@ -11,7 +11,7 @@ if [[ ${vOutputCfg} == "" ]]; then
 fi
 
 source ${vJsonParser} ${vJsonPropFile}
-vJK_PipelineLog="$(fnExtractJson jk_url)/blue/organizations/jenkins/$(fnExtractJson jk_org)%2F$(fnExtractJson jk_repo)/detail/$(fnExtractJson jk_branch)/${BUILD_NUMBER}/pipeline"
+vJK_PipelineLog="${BUILD_URL}console"
 
 echo ${vJK_PipelineLog}
 
