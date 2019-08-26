@@ -1,15 +1,67 @@
 #!/usr/bin/env groovy
 def node1 = ''
-def node2 = ''
-def node3 = ''
 def isFinished = false
+
+// -----------------------  Global Variables -------------------- //
+
+def v_Git_TAF_Server = ''
+def v_Git_TAF_Repo = ''
+def v_Git_TAF_RepoBranch = ''
+def v_Git_TC_Server = ''
+def v_Git_TC_Repo = ''
+def v_Git_Org = ''
+
+// Path defs
+def v_EVS_Root = ''
+def v_TM_Path = ''
+def v_TM_Trigger_Path = ''
+def v_TM_Utils_Path = ''
+def v_TAF_Path = ''
+def v_TAF_Cfg_Path = ''
+def v_TAF_Artifacts_Path = ''
+def v_TM_ReportTemplate = ''
+
+loadGlobalLibrary()
+
+properties(
+    [parameters
+        ([
+            string(defaultValue: '*/master', description: '''
+              GitHub PR Trigger provided parameter for specifying the commit
+              to checkout.
+
+              If using GitHub, in a manual build override with a branch path or
+              sha1 hash to a specific commit. For example: '{branch}' ''',
+		name: 'sha1'),
+
+            string(defaultValue: 'stats.edgexfoundry.org', description: '''
+		Parameter to identify a SCM project to build. This is typically
+                the project repo path. For example: ofextensions/circuitsw''',
+		name: 'INFLUXDBHOST'),
+
+            string(defaultValue: 'centos7-blackbox-4c-2g', description: '''
+		EdgeX services run on this node, can't be empt''',
+		name: 'NODE_EDGEX_1'),
+
+            string(defaultValue: 'ubuntu18.04-docker-arm64-4c-2g', description: '''
+                Trigger TAF script, can't be empty''',
+		name: 'NODE_TEST_HOST')
+        ])
+    ]
+)
 
 pipeline {
     options {
         timeout(time: 28, unit: 'HOURS') 
     }  
     agent none
-    stages {
+
+    options {
+        timestamps()
+    }
+
+    stages{
+
         stage ('Start Test'){
             parallel {
                 stage ('Node 1') {
@@ -19,12 +71,15 @@ pipeline {
                             steps{
                                 script {                                
                                     sh "sed 's/influxDBHost/'${env.INFLUXDBHOST}'/g; s/NODE/node-1/g' telegraf/telegraf-template.conf > telegraf/telegraf.conf"
-                                    // Install docker-compose
-                                    sh './docker-compose-setup.sh'
+
+				    // Install docker-compose
+                                    sh './scripts/docker-compose-setup.sh'
                                     
                                     // Deploy edgeX
                                     sh 'cd telegraf; ./deploy-edgeX-Service.sh'
                                     sh 'docker logs telegraf'
+				    echo "Docker ps output:"
+				    sh 'docker ps'
                                     
                                     // Get client IP
                                     node1 = sh(returnStdout: true, script: "hostname -i | tr ' ' '\n' | grep '^10.' | head -n 1")
@@ -44,127 +99,144 @@ pipeline {
                             }
                         }
                     }
-                }     
+                }
                     
-                stage ('Node 2') {
-                    when { expression{ return "${env.NODE_EDGEX_2}" !=''} }
-                    agent { label "${env.NODE_EDGEX_2}" }
+                stage ('Test Executor Progress') {
+                    agent { label "${env.NODE_TEST_HOST}" }
                     stages {
-                        stage ('Node 2: Deploy Services') {
+
+			stage ('Init') {
+			    steps {
+				script {
+				    tafBuildNum = generateBuildNumber()
+				    echo "tafBuildNum: $tafBuildNum"
+				    env.CUSTOM_BUILD_NUMBER = "${tafBuildNum}-${env.BUILD_NUMBER}"
+				    env.NEXUS_EXT_PATH = "${env.SILO}/${env.JENKINS_HOSTNAME}/${env.JOB_NAME}"
+				    def jsonProp = readJSON file:'TM-Properties.json'
+				    v_Git_TAF_Server = jsonProp.git_url
+				    v_Git_TAF_Repo = jsonProp.git_taf_repo
+				    v_Git_TAF_RepoBranch = jsonProp.git_branch
+				    v_Git_TC_Server = "${v_Git_TAF_Server}"
+				    v_Git_TC_Repo = jsonProp.git_tc_repo
+				    v_Git_Org = jsonProp.git_org
+
+				    // Path defs
+				    v_EVS_Root = "${env.WORKSPACE}/evs-root"
+				    v_TM_Path = "${v_EVS_Root}/${v_Git_TC_Repo}/TAF-Manager"
+				    v_TM_Trigger_Path = "${v_TM_Path}/trigger"
+				    v_TM_Utils_Path = "${v_TM_Path}/utils"
+				    v_TAF_Path = "${v_EVS_Root}/TAF"
+				    v_TAF_Cfg_Path = "${v_TAF_Path}/config"
+				    v_TAF_Artifacts_Path = "${v_TAF_Path}/testArtifacts"
+				    v_TM_ReportTemplate = jsonProp.report_text
+				    echo "CUSTOM_BUILD_NUMBER: ${env.CUSTOM_BUILD_NUMBER}"
+				    echo "NEXUS_EXT_PATH: ${env.NEXUS_EXT_PATH}"
+				}
+			    }
+			}
+
+			stage ('VCS') {
+			    steps {
+				dir('evs-root') {
+				    git branch: 'master',
+					url: "https://${v_Git_TAF_Server}/${v_Git_Org}/${v_Git_TAF_Repo}.git"
+				    dir("${v_Git_TC_Repo}") {
+					git branch: 'tm_reporting',
+					    url: "https://${v_Git_TC_Server}/${v_Git_Org}/${v_Git_TC_Repo}.git"
+				    }
+				}
+			    }
+			}
+                        stage ('TM: Docker Setup'){
                             steps {
-                                script {                                    
-                                    sh "sed 's/influxDBHost/'${env.INFLUXDBHOST}'/g; s/NODE/node-2/g' telegraf/telegraf-template.conf > telegraf/telegraf.conf"
-                                    // Install docker-compose
-                                    sh './docker-compose-setup.sh'
-                                    
-                                    // Deploy edgeX
-                                    sh 'cd telegraf; ./deploy-edgeX-Service.sh'
-                                    // Get client IP
-                                    node2 = sh(returnStdout: true, script: "hostname -i | tr ' ' '\n' | grep '^10.' | head -n 1")
-                                    node2 = "${node2}".trim()
+                                script {
+                                    sh 'scripts/docker-compose-setup.sh'
                                 }
                             }
                         }
-                        stage ('Node 2: Keep alive for receiving requests') {
+
+                        stage ('TM: Config Generation'){
                             steps {
-                                script {                         
-                                    waitUntil {
-                                        script {
-                                            return isFinished
-                                        }
+                                script {
+				    echo "In Config Generation"
+                                    sh "scripts/TM-GenerateProjectCfg.sh ${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
+				    sh "scripts/TM-GenerateMailTemplate.sh ${v_TM_Trigger_Path}/${v_TM_ReportTemplate}"
+				    sh "scripts/TM-GenerateRobotCfg.sh ${v_TAF_Cfg_Path}/platform.cfg"
+                                }
+                            }
+                        }
+
+                        stage ('TM: Robot execution') {
+                            steps {
+                                script {                                    
+                                    echo "Node to be tested : ${node1}"
+				    withEnv(["node1=${node1}"]){
+					def v_Report = "${v_TAF_Artifacts_Path}/${CUSTOM_BUILD_NUMBER}"
+					echo "Test host details:"
+                                        sh 'uname -a'
+					echo "Installing the tools"
+					sh "cd ${v_EVS_Root}; sudo ./updateme.sh"
+					echo "Test execution on: ${env.SILO}"
+					def executionTimeSec = currentBuild.durationString.replaceAll(' and counting', '')
+					sh "bash ${v_TM_Trigger_Path}/TM-Trigger.sh ${v_TM_Trigger_Path}/${v_Git_TAF_Repo}.conf"
+					sh "[ -d ${v_Report} ] && zip -r ${v_TAF_Artifacts_Path}/artifacts.zip ${v_Report}"
                                     }
                                 }
                             }
-                        }
-                    }
-                }
+			}
 
-                stage ('Node 3') {
-                    when { expression{ return "${env.NODE_EDGEX_3}" !=''} }
-                    agent { label "${env.NODE_EDGEX_3}" }
-                    stages {
-                        stage ('Node 3: Deploy Services') {
-                            steps {
-                                script {
-                                    sh "sed 's/influxDBHost/'${env.INFLUXDBHOST}'/g; s/NODE/node-3/g' telegraf/telegraf-template.conf > telegraf/telegraf.conf"
+			stage ('TM: Orchestration') {
+			    steps {
+				script {
+				    try {
+					sh "cp -v ${v_TM_Trigger_Path}/${v_TM_ReportTemplate} ${WORKSPACE}"
+					def executionTimeSec = currentBuild.durationString.replaceAll(' and counting', '')
+					sh "scripts/TM-UpdateReport.sh ${executionTimeSec}"
+					echo "Publishing the report"
+					archiveArtifacts ([
+					    allowEmptyArchive: true,
+					    artifacts: "${v_TM_ReportTemplate}"
+					])
 
-                                    // Install docker-compose
-                                    sh './docker-compose-setup.sh'
-                                    
-                                    // Deploy edgeX
-                                    sh 'cd telegraf; ./deploy-edgeX-Service.sh'
+					echo "Orchestration of TAF artifacts to Nexus repository"
+					edgeXNexusPublish([
+					    serverId: 'nexus.edgexfoundry.org',
+					    mavenSettings: 'taf-settings',
+					    nexusPath: "${env.NEXUS_EXT_PATH}",
+					    nexusRepo: 'taf',
+					    zipFilePath: '**/testArtifacts/*.zip'
+					])
 
-                                    // Get client IP
-                                    node3 = sh(returnStdout: true, script: "hostname -i | tr ' ' '\n' | grep '^10.' | head -n 1")
-                                    node3 = "${node3}".trim()
-                                }
-                            }
-                        }
-                        stage ('Node 3: Keep alive for receiving requests'){
-                            steps {
-                                script {
-                                    waitUntil {
-                                        script {
-                                            return isFinished
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                stage ('JMeter Progress') {
-                    agent { label "${env.NODE_JMETER}" }
-                    environment { INFLUXDBHOST = "${env.INFLUXDBHOST}" }
-                    stages {
-                        stage ('JMeter: Setup'){
-                            steps {
-                                script {
-                                    sh './docker-compose-setup.sh'
-                                }
-                            }
-                        }
-                        stage ('JMeter: Wait until all nodes deply completely') {
-                            steps {
-                                script {
-                                    waitUntil {
-                                        script {
-                                            if ("${env.NODE_EDGEX_2}" == '') {
-                                                node2 = "${node1}"
-                                            } else {
-                                            node2 = "${node2}"
-                                            }
-                                            if ("${env.NODE_EDGEX_3}" == '') {
-                                                node3 = "${node1}"
-                                            } else {
-                                                node3 = "${node3}"
-                                            } 
-                                            return (node1 != '' && node2 != '' && node3 != '')
-                                        }
-                                    }                                    
-                                }
-                            }
-                        }
-                        stage ('JMeter: Sending requests to all nodes - long run') {
-                            steps {
-                                script {                                    
-                                    echo "node1 : ${node1}"
-                                    echo "node2 : ${node2}"
-                                    echo "node3 : ${node3}"
-                                    try {
-                                        withEnv(["node1=${node1}","node2=${node2}","node3=${node3}"]){
-                                            sh 'cd jmeter; sh ./exec_test.sh'
-                                        }
-                                    } finally {
+				    } finally {
                                         isFinished = true
-                                    }
-                                }
-                            }
-                        }
-                    }       
+				    }
+				}
+			    }
+			}
+                    }
                 }
             }
         }
     }
+}
+
+// EdgeX Nexus publish
+def loadGlobalLibrary(branch = '*/master') {
+    library(identifier: 'edgex-global-pipelines@master', 
+        retriever: legacySCM([
+            $class: 'GitSCM',
+            userRemoteConfigs: [[url: 'https://github.com/edgexfoundry/edgex-global-pipelines.git']],
+            branches: [[name: branch]],
+            doGenerateSubmoduleConfigurations: false,
+            extensions: [
+                [$class: 'SubmoduleOption', recursiveSubmodules: true],
+                [$class: 'IgnoreNotifyCommit']
+            ]
+        ])
+    )
+}
+
+// Function definition to generate the random number
+def generateBuildNumber() {
+    sh(script: 'echo $(date +"%Y%m%d%I%M")', returnStdout: true).trim()
 }
