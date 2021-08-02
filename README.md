@@ -1,4 +1,6 @@
 # EdgeX Foundry Proformance Tests
+[![Build Status](https://jenkins.edgexfoundry.org/view/EdgeX%20Foundry%20Project/job/edgexfoundry/job/performance-test/job/main/badge/icon)](https://jenkins.edgexfoundry.org/view/EdgeX%20Foundry%20Project/job/edgexfoundry/job/performance-test/job/main/) [![GitHub Pull Requests](https://img.shields.io/github/issues-pr-raw/edgexfoundry/performance-test)](https://github.com/edgexfoundry/performance-test/pulls) [![GitHub Contributors](https://img.shields.io/github/contributors/edgexfoundry/performance-test)](https://github.com/edgexfoundry/performance-test/contributors) [![GitHub Committers](https://img.shields.io/badge/team-committers-green)](https://github.com/orgs/edgexfoundry/teams/performance-test-committers/members) [![GitHub Commit Activity](https://img.shields.io/github/commit-activity/m/edgexfoundry/performance-test)](https://github.com/edgexfoundry/performance-test/commits)
+
 
 
 ## Folder structure
